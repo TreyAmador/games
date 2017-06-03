@@ -1,6 +1,6 @@
 #ifndef TEST_H_
 #define TEST_H_
-#include "core.h"
+//#include "core.h"
 #include "node.h"
 #include "game.h"
 #include "io.h"
@@ -33,16 +33,9 @@ void test_child_node() {
 	IO io;
 
 	Node* parent = test_node_01();
-	//for (int i = 0; i < dim::SPAN; ++i) {
-	//	parent->col_score_[i] = game.update_min_max_col(parent,i,SYMBOL::PLAYER);
-	//	parent->row_score_[i] = game.update_min_max_row(parent,i,SYMBOL::PLAYER);
-	//}
-	//parent->alpha_ = game.calculate_alpha_from_vectors(parent);
-
-
 	io.print_node_and_vec_score(parent);
 
-	//game.create_child_node(parent,)
+
 
 
 }
@@ -229,12 +222,13 @@ Node* test_node_01() {
 	node->config_[44] = SYMBOL::OPPONENT;
 	node->config_[51] = SYMBOL::OPPONENT;
 
-	Game game;
-	for (int i = 0; i < dim::SPAN; ++i) {
-		node->col_score_[i] = game.update_min_max_col(node, i, SYMBOL::PLAYER);
-		node->row_score_[i] = game.update_min_max_row(node, i, SYMBOL::PLAYER);
-	}
-	node->alpha_ = game.calculate_alpha_from_vectors(node);
+	//Game game;
+	//for (int i = 0; i < dim::SPAN; ++i) {
+	//	node->col_score_[i] = game.update_min_max_col(node, i, SYMBOL::PLAYER);
+	//	node->row_score_[i] = game.update_min_max_row(node, i, SYMBOL::PLAYER);
+	//}
+	// this will have to have player/opponent passed in together
+	//node->alpha_ = game.calculate_score_from_vectors(node);
 
 	return node;
 
@@ -254,12 +248,22 @@ Node* test_node_02() {
 	node->config_[36] = SYMBOL::PLAYER;
 
 
+	//Game game;
+	//for (int i = 0; i < dim::SPAN; ++i)
+	//	game.calculate_vector_scores(node, i, i);
+
 	Game game;
-	for (int i = 0; i < dim::SPAN; ++i) {
-		node->col_score_[i] = game.update_min_max_col(node, i, SYMBOL::PLAYER);
-		node->row_score_[i] = game.update_min_max_row(node, i, SYMBOL::PLAYER);
-	}
-	node->alpha_ = game.calculate_alpha_from_vectors(node);
+	for (int i = 0; i < dim::SPAN; ++i)
+		game.calculate_vector_scores(node, i, i);
+	game.calculate_score_from_vectors(
+		node, node->player_score_, node->opponent_score_);
+
+
+	//for (int i = 0; i < dim::SPAN; ++i) {
+	//	node->col_score_[i] = game.update_min_max_col(node, i, SYMBOL::PLAYER);
+	//	node->row_score_[i] = game.update_min_max_row(node, i, SYMBOL::PLAYER);
+	//}
+	//node->alpha_ = game.calculate_alpha_from_vectors(node);
 
 	return node;
 }

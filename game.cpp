@@ -1,7 +1,7 @@
 #include "game.h"
 #include "node.h"
 #include "io.h"
-#include "global.h"
+//#include "global.h"
 #include <iostream>
 typedef Node* GameBoard;
 
@@ -49,16 +49,14 @@ Node* Game::create_child_node(Node* parent, int row, int col, char symbol) {
 	//child->row_score_[row] = this->update_min_max_row(child, row, SYMBOL::PLAYER);
 
 	// check this
-	child->row_player_[row] = this->update_min_max_row(child, row, SYMBOL::PLAYER);
-	child->col_player_[col] = this->update_min_max_col(child, col, SYMBOL::PLAYER);
-	child->row_opponent_[row] = this->update_min_max_row(child, row, SYMBOL::OPPONENT);
-	child->col_opponent_[col] = this->update_min_max_col(child, col, SYMBOL::OPPONENT);
+	//child->row_player_[row] = this->update_min_max_row(child, row, SYMBOL::PLAYER);
+	//child->col_player_[col] = this->update_min_max_col(child, col, SYMBOL::PLAYER);
+	//child->row_opponent_[row] = this->update_min_max_row(child, row, SYMBOL::OPPONENT);
+	//child->col_opponent_[col] = this->update_min_max_col(child, col, SYMBOL::OPPONENT);
 
-
-
-	// player or opponent score ...?
-	// this will have to be revised ...
-	child->player_score_ = this->calculate_score_from_vectors(child);
+	this->calculate_vector_scores(child, row, col);
+	child->player_score_ = this->calculate_score_from_vectors(
+		child, child->player_score_, child->opponent_score_);
 	child->parent_ = parent;
 
 	return child;
@@ -66,11 +64,30 @@ Node* Game::create_child_node(Node* parent, int row, int col, char symbol) {
 }
 
 
-int Game::calculate_score_from_vectors(Node* node) {
-	int sum = 0;
-	for (int i = 0; i < dim::SPAN; ++i)
-		sum += node->row_score_[i] + node->col_score_[i];
-	return sum;
+void Game::calculate_vector_scores(Node* node, int row, int col) {
+	node->row_player_[row] = this->update_min_max_row(node, row, SYMBOL::PLAYER);
+	node->col_player_[col] = this->update_min_max_col(node, col, SYMBOL::PLAYER);
+	node->row_opponent_[row] = this->update_min_max_row(node, row, SYMBOL::OPPONENT);
+	node->col_opponent_[col] = this->update_min_max_col(node, col, SYMBOL::OPPONENT);
+}
+
+
+
+// pass player and opponent scores by reference
+// return player score, not opponent score
+int Game::calculate_score_from_vectors(Node* node, int& player, int& opponent) {
+	//int sum = 0;
+	//for (int i = 0; i < dim::SPAN; ++i)
+	//	sum += node->row_score_[i] + node->col_score_[i];
+	//return sum;
+
+	player = opponent = 0;
+	for (int i = 0; i < dim::SPAN; ++i) {
+		player += node->row_player_[i] + node->col_player_[i];
+		opponent += node->row_opponent_[i] + node->col_opponent_[i];
+	}
+
+	return player;
 }
 
 

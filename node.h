@@ -1,6 +1,13 @@
 #ifndef NODE_H_
 #define NODE_H_
-#include "global.h"
+//#include "global.h"
+
+
+namespace dim {
+	const int SPAN = 8;
+	const int SIZE = SPAN * SPAN;
+	const int MAX_ADJ = 4;
+}
 
 
 //	TODO BIG IDEAS for the NODE
@@ -124,13 +131,19 @@ struct Node {
 		}
 
 
-		util::clear_ptrs(row_player_);
-		util::clear_ptrs(col_player_);
-		util::clear_ptrs(row_opponent_);
-		util::clear_ptrs(col_opponent_);
+		this->clear_ptrs(row_player_);
+		this->clear_ptrs(col_player_);
+		this->clear_ptrs(row_opponent_);
+		this->clear_ptrs(col_opponent_);
+
+	}
 
 
-		
+	void clear_ptrs(int* ptr) {
+		if (ptr != nullptr) {
+			delete[] ptr;
+			ptr = nullptr;
+		}
 	}
 
 	char* config_;

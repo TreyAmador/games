@@ -3,7 +3,7 @@
 #include <vector>
 #include <queue>
 #include <stack>
-#include "global.h"
+//#include "global.h"
 struct Node;
 
 
@@ -28,8 +28,10 @@ public:
 
 	Node* create_child_node(Node* parent, int row, int col, char symbol);
 
+	void calculate_vector_scores(Node* node, int row, int col);
+
 	// calc player from vectors
-	int calculate_score_from_vectors(Node* node);
+	int calculate_score_from_vectors(Node* node, int& player, int& opponent);
 
 	int update_min_max_row(Node* node, int row, char player);
 	int update_min_max_col(Node* node, int col, char player);
