@@ -1,14 +1,15 @@
 #include "game.h"
 #include "node.h"
 #include "io.h"
-//#include "global.h"
 #include <iostream>
-typedef Node* GameBoard;
 
 
 namespace {
 	const int MAX_LEAVES = 5;
 }
+
+
+typedef Node* GameBoard;
 
 
 Game::Game() {
@@ -31,10 +32,16 @@ std::vector<Node*> Game::possible_configs(Node* root) {
 	std::vector<Node*> nodes;
 
 
-
-
-
 	return nodes;
+}
+
+
+std::vector<Coordinate> Game::query_moves(Node* node) {
+
+
+
+
+
 }
 
 

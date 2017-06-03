@@ -57,15 +57,9 @@ void IO::print_node_and_vec_score(Node* node) {
 		}
 		std::cout << node->config_[i] << " ";
 	}
-	std::cout << "\n" << std::endl;
-
-	std::cout <<
+	std::cout << "\n\n" <<
 		"Player score    " << node->player_score_ << "\n" <<
 		"Opponent score  " << node->opponent_score_ << "\n\n" << std::endl;
-
-	//std::cout <<
-	//	"Alpha " << node->alpha_ << "\n" <<
-	//	"Beta  " << node->beta_ << "\n\n" << std::endl;
 
 }
 

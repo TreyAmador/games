@@ -10,7 +10,6 @@ struct Node;
 // keeps track of score for rows and columns
 // probably don't need this, actually
 struct Coordinate {
-	char symbol_;
 	int row_;
 	int col_;
 };
@@ -25,6 +24,9 @@ public:
 	
 	// pass in node, get all adjacent nodes
 	std::vector<Node*> possible_configs(Node* root);
+
+	std::vector<Coordinate> query_moves(Node* node);
+
 
 	Node* create_child_node(Node* parent, int row, int col, char symbol);
 

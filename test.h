@@ -7,6 +7,35 @@
 #include <iostream>
 #include <chrono>
 
+
+struct Vec2D {
+
+	int x_;
+	int y_;
+
+	Vec2D(int x, int y) :
+		x_(x), y_(y)
+	{}
+
+};
+
+
+long long get_init_time() {
+	return std::chrono::high_resolution_clock::now().time_since_epoch().count();
+}
+
+
+long long time_span_nanoseconds(long long init) {
+	return std::chrono::high_resolution_clock::now().time_since_epoch().count() - init;
+}
+
+
+long long time_span_milliseconds(long long init) {
+	return time_span_nanoseconds(init) / 1000000;
+}
+
+
+
 Node* test_node_01();
 
 void test_row_and_col_heuristic();
@@ -22,6 +51,73 @@ void test_efficiency();
 void test_victory();
 
 void test_child_node();
+
+
+
+void test_pass_args(Vec2D& vec) {
+	int x = vec.x_;
+	int y = vec.y_;
+}
+
+
+void test_pass_args(Vec2D* vec) {
+	int x = vec->x_;
+	int y = vec->y_;
+}
+
+
+void test_pass_args(int x, int y) {
+	int a = x;
+	int b = y;
+}
+
+
+void test_pass_ref_ptr_int() {
+
+
+	// round one
+	long long init = get_init_time();
+	for (int i = 0; i < 1000000; ++i) {
+		//int a = i, b = i+1;
+		//test_pass_args(a, b);
+		int a[100];
+		for (int i = 0; i < 100; ++i) {
+			a[i] = i + 1;
+		}
+	}
+	std::cout << "int args  " << time_span_milliseconds(init) << std::endl;
+
+
+
+
+	// round two
+	init = get_init_time();
+	for (int i = 0; i < 1000000; ++i) {
+		//Vec2D vec(i, i+1);
+		//test_pass_args(vec);
+		int* a = new int[100];
+		for (int i = 0; i < 100; ++i) {
+			a[i] = i + 1;
+		}
+	}
+	std::cout << "ref args  " << time_span_milliseconds(init) << std::endl;
+
+
+
+	// round three
+	init = get_init_time();
+	for (int i = 0; i < 1000000; ++i) {
+		//Vec2D* vec = new Vec2D(i, i + 1);
+		//test_pass_args(vec);
+		//delete vec;
+	}
+	std::cout << "ptr args  " << time_span_milliseconds(init) << std::endl;
+
+
+}
+
+
+
 
 
 
@@ -247,25 +343,14 @@ Node* test_node_02() {
 	node->config_[11] = SYMBOL::OPPONENT;
 	node->config_[36] = SYMBOL::PLAYER;
 
-
-	//Game game;
-	//for (int i = 0; i < dim::SPAN; ++i)
-	//	game.calculate_vector_scores(node, i, i);
-
 	Game game;
 	for (int i = 0; i < dim::SPAN; ++i)
 		game.calculate_vector_scores(node, i, i);
 	game.calculate_score_from_vectors(
 		node, node->player_score_, node->opponent_score_);
 
-
-	//for (int i = 0; i < dim::SPAN; ++i) {
-	//	node->col_score_[i] = game.update_min_max_col(node, i, SYMBOL::PLAYER);
-	//	node->row_score_[i] = game.update_min_max_row(node, i, SYMBOL::PLAYER);
-	//}
-	//node->alpha_ = game.calculate_alpha_from_vectors(node);
-
 	return node;
+
 }
 
 
