@@ -12,6 +12,12 @@ namespace {
 typedef Node* GameBoard;
 
 
+//struct IndexElement {
+//	int index_;
+//	int element_;
+//};
+
+
 Game::Game() {
 
 }
@@ -36,38 +42,88 @@ std::vector<Node*> Game::possible_configs(Node* root) {
 }
 
 
-std::vector<Coordinate> Game::query_moves(Node* node) {
+
+// TODO implement this method!
+//
+//
+//		returns the index of the next potential moves
+//		this should be different depending on alpha/beta
+//
+//		push pairs of coords onto vector
+//		decide which has the greatest weight
+//			determined by score of row and col
+//		a way to weight the values would be nice
+//		and it's probably adventageous to give priority
+//			to more centered moves ?
+//
+//		if you are alpha
+//			choose the highest value for player
+//		if you are beta
+//			choose highest value for opponent
+//		test while vector.size <= 5 ?
 
 
+std::vector<int> Game::query_moves_alpha(Node* node) {
 
+	// perhaps allocate memory right off the bat
+	std::vector<int> indices;
 
+	
+	int idx = -1;
+	int fst_row = this->greatest_index(node->row_player_, idx);
+	int sec_row = this->greatest_index(node->row_player_, idx);
+	idx = -1;
+	int fst_col = this->greatest_index(node->col_player_, idx);
+	int sec_col = this->greatest_index(node->col_player_, idx);
+	
 
+	return indices;
+	
 }
 
 
 
+// this works
+int Game::greatest_index(int* config, int& bypass) {
+	int max_elem = -1, max_indx = -1;
+	for (int i = 0; i < dim::SPAN; ++i) {
+		int cur_elem = config[i];
+		if (cur_elem > max_elem && i != bypass) {
+			max_elem = cur_elem;
+			max_indx = i;
+		}
+	}
+	bypass = max_indx;
+	return max_indx;
+}
+
+
+/*
+int Game::greatest_index(char* config, int& bypass) {
+	char max_elem = -1;
+	int max_indx = -1;
+	for (int i = 0; i < dim::SPAN; ++i) {
+		char cur_elem = config[i];
+		if (cur_elem > max_elem && i != bypass) {
+			max_elem = cur_elem;
+			max_indx = i;
+		}
+	}
+	bypass = max_indx;
+	return max_indx;
+}
+*/
+
+
 // TODO test this
 Node* Game::create_child_node(Node* parent, int row, int col, char symbol) {
-	
 	Node* child = new Node(parent);
 	child->config_[row*dim::SPAN+col] = symbol;
-	
-	//child->col_score_[col] = this->update_min_max_col(child, col, SYMBOL::PLAYER);
-	//child->row_score_[row] = this->update_min_max_row(child, row, SYMBOL::PLAYER);
-
-	// check this
-	//child->row_player_[row] = this->update_min_max_row(child, row, SYMBOL::PLAYER);
-	//child->col_player_[col] = this->update_min_max_col(child, col, SYMBOL::PLAYER);
-	//child->row_opponent_[row] = this->update_min_max_row(child, row, SYMBOL::OPPONENT);
-	//child->col_opponent_[col] = this->update_min_max_col(child, col, SYMBOL::OPPONENT);
-
 	this->calculate_vector_scores(child, row, col);
-	child->player_score_ = this->calculate_score_from_vectors(
+	this->calculate_score_from_vectors(
 		child, child->player_score_, child->opponent_score_);
 	child->parent_ = parent;
-
 	return child;
-
 }
 
 
@@ -82,19 +138,12 @@ void Game::calculate_vector_scores(Node* node, int row, int col) {
 
 // pass player and opponent scores by reference
 // return player score, not opponent score
-int Game::calculate_score_from_vectors(Node* node, int& player, int& opponent) {
-	//int sum = 0;
-	//for (int i = 0; i < dim::SPAN; ++i)
-	//	sum += node->row_score_[i] + node->col_score_[i];
-	//return sum;
-
+void Game::calculate_score_from_vectors(Node* node, int& player, int& opponent) {
 	player = opponent = 0;
 	for (int i = 0; i < dim::SPAN; ++i) {
 		player += node->row_player_[i] + node->col_player_[i];
 		opponent += node->row_opponent_[i] + node->col_opponent_[i];
 	}
-
-	return player;
 }
 
 
@@ -104,6 +153,8 @@ int Game::calculate_score_from_vectors(Node* node, int& player, int& opponent) {
 //		else if symbol != SYMBOL::EMPTY
 //			uninterrupted = -1;
 //		then set to zero
+
+// this works
 int Game::update_min_max_row(Node* node, int row, char player) {
 	int row_score = 0;
 	int r = row*dim::SPAN;
@@ -122,6 +173,7 @@ int Game::update_min_max_row(Node* node, int row, char player) {
 }
 
 
+// this works
 int Game::update_min_max_col(Node* node, int col, char player) {
 	int c = col;
 	int column_score = 0;
@@ -154,7 +206,6 @@ void Game::make_first_move(Node* node) {
 // that are indeces in the array
 void Game::place_symbol_by_indeces(Node* node, char symbol, int row, int col) {
 	node->config_[row*dim::SPAN+col] = symbol;
-	//taken_spaces_.push_back({ symbol, row, col });
 }
 
 
@@ -165,7 +216,7 @@ void Game::place_symbol_from_prompt(Node* node, char symbol, int row, int col) {
 
 
 
-// this works well!
+// this works
 bool Game::won_game(Node* node, char symbol) {
 
 	for (int r = 0; r < dim::SPAN; ++r) {

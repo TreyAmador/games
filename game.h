@@ -3,7 +3,6 @@
 #include <vector>
 #include <queue>
 #include <stack>
-//#include "global.h"
 struct Node;
 
 
@@ -25,15 +24,18 @@ public:
 	// pass in node, get all adjacent nodes
 	std::vector<Node*> possible_configs(Node* root);
 
-	std::vector<Coordinate> query_moves(Node* node);
+	std::vector<int> query_moves_alpha(Node* node);
 
+	int greatest_index(int* span, int& bypass);
+	//int greatest_index(char* span, int& bypass);
 
 	Node* create_child_node(Node* parent, int row, int col, char symbol);
 
 	void calculate_vector_scores(Node* node, int row, int col);
 
 	// calc player from vectors
-	int calculate_score_from_vectors(Node* node, int& player, int& opponent);
+	void calculate_score_from_vectors(
+		Node* node, int& player, int& opponent);
 
 	int update_min_max_row(Node* node, int row, char player);
 	int update_min_max_col(Node* node, int col, char player);
@@ -42,11 +44,21 @@ public:
 	void place_symbol_from_prompt(Node* node, char symbol, int row, int col);
 	void make_first_move(Node* node);
 
+
 	// TODO don't pass by symbol, just iterate
-	// any four in a row is a winner
-	// maybe return -1 for loss, +1 for win
-	// count blank squares, if 0, tie
+	//		any four in a row is a winner
+	//		maybe return -1 for loss, +1 for win
+	//		count blank squares, if 0, tie
 	bool won_game(Node* node, char symbol);
+
+
+	// returns	+1 for player win
+	//			-1 for opponent win
+	//			 0 ambiguous... spaces left
+	//			 or perhaps something more discrete
+	//int winning_config(Node* node);
+
+
 	void reset_game_board();
 
 

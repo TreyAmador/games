@@ -1,6 +1,5 @@
 #ifndef TEST_H_
 #define TEST_H_
-//#include "core.h"
 #include "node.h"
 #include "game.h"
 #include "io.h"
@@ -35,11 +34,10 @@ long long time_span_milliseconds(long long init) {
 }
 
 
-
 Node* test_node_01();
+Node* test_node_02();
 
 void test_row_and_col_heuristic();
-
 void test_row_heuristic_01();
 void test_row_heuristic_02(int row);
 void test_row_heuristic_03(int row);
@@ -49,9 +47,51 @@ void test_col_heuristic_02(int col);
 void test_efficiency();
 
 void test_victory();
+void test_max_row_col();
 
 void test_child_node();
 
+
+
+
+void test_max_row_col() {
+
+	Game game;
+	IO io;
+
+	Node* node = test_node_02();
+	io.print_node_and_vec_score(node);
+
+	int idx = -1;
+	int fst_row = game.greatest_index(node->row_player_, idx);
+	int sec_row = game.greatest_index(node->row_player_, idx);
+	idx = -1;
+	int fst_col = game.greatest_index(node->col_player_, idx);
+	int sec_col = game.greatest_index(node->col_player_, idx);
+
+	std::cout << "row indices " << fst_row << ", " << sec_row << "\n";
+	std::cout << "col indices " << fst_col << ", " << sec_col << "\n\n";
+
+}
+
+
+
+void test_find_max_element() {
+
+	Game game;
+	char* idx = new char[dim::SPAN];
+	for (int i = 0; i < dim::SPAN; ++i) {
+		idx[i] = ((i*11) % 31);
+		std::cout << static_cast<int>(idx[i]) << std::endl;
+	}
+	int bypass_index = -1;
+
+	//int index_a = game.find_greatest_index(idx, bypass_index);
+	//std::cout << "bypass " << bypass_index << ", found " << index_a << "\n";
+	//int index_b = game.find_greatest_index(idx, bypass_index);
+	//std::cout << "bypass " << bypass_index << ", found " << index_b << "\n";
+
+}
 
 
 void test_pass_args(Vec2D& vec) {
