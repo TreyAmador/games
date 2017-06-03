@@ -25,13 +25,6 @@ namespace dim {
 //				in minimax, end if winner found or use
 //				the node which has the highest utility value
 //
-//		
-//
-//
-//
-//
-
-
 
 
 enum SYMBOL {
@@ -39,7 +32,6 @@ enum SYMBOL {
 	PLAYER = 'X',
 	OPPONENT = 'O'
 };
-
 
 
 struct Node {
@@ -50,8 +42,8 @@ struct Node {
 		alpha_(0), beta_(0), 
 
 		// TODO remove
-		row_score_(new int[dim::SPAN]),
-		col_score_(new int[dim::SPAN]),
+		//row_score_(new int[dim::SPAN]),
+		//col_score_(new int[dim::SPAN]),
 		
 		
 		row_player_(new int[dim::SPAN]),
@@ -65,7 +57,7 @@ struct Node {
 		for (int i = 0; i < dim::SPAN; ++i) {
 
 			// TODO remove
-			this->row_score_[i] = this->col_score_[i] = 0;
+			//this->row_score_[i] = this->col_score_[i] = 0;
 
 			this->row_player_[i] = this->col_player_[i] = 
 				this->row_opponent_[i] = this->col_opponent_[i] = 0;
@@ -77,8 +69,8 @@ struct Node {
 		config_(new char[dim::SIZE]),
 		
 		// TODO remove
-		row_score_(new int[dim::SPAN]),
-		col_score_(new int[dim::SPAN]),
+		//row_score_(new int[dim::SPAN]),
+		//col_score_(new int[dim::SPAN]),
 
 		row_player_(new int[dim::SPAN]),
 		col_player_(new int[dim::SPAN]),
@@ -91,8 +83,8 @@ struct Node {
 		for (int i = 0; i < dim::SPAN; ++i) {
 			
 			// TODO remove
-			this->row_score_[i] = node->row_score_[i];
-			this->col_score_[i] = node->col_score_[i];
+			//this->row_score_[i] = node->row_score_[i];
+			//this->col_score_[i] = node->col_score_[i];
 
 
 			this->row_player_[i] = node->row_player_[i];
@@ -121,14 +113,14 @@ struct Node {
 
 
 		// TODO delete
-		if (this->row_score_ != nullptr) {
-			delete[] row_score_;
-			row_score_ = nullptr;
-		}
-		if (this->col_score_ != nullptr) {
-			delete[] col_score_;
-			col_score_ = nullptr;
-		}
+		//if (this->row_score_ != nullptr) {
+		//	delete[] row_score_;
+		//	row_score_ = nullptr;
+		//}
+		//if (this->col_score_ != nullptr) {
+		//	delete[] col_score_;
+		//	col_score_ = nullptr;
+		//}
 
 
 		this->clear_ptrs(row_player_);
@@ -164,9 +156,10 @@ struct Node {
 	// could check which row/col is the highest
 	// then iterate to find which col/row is highest
 	// move there next
+	
 	// should this be a opponent/player row/col scores?
-	int* row_score_;
-	int* col_score_;
+	//int* row_score_;
+	//int* col_score_;
 
 
 	// this is better

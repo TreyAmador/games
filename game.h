@@ -23,15 +23,22 @@ public:
 	
 	// pass in node, get all adjacent nodes
 	std::vector<Node*> possible_configs(Node* root);
-
 	std::vector<int> query_moves_alpha(Node* node);
+	
+	void insert_unique(std::vector<int>& vec, int elem);
 
-	int greatest_index(int* span, int& bypass);
-	//int greatest_index(char* span, int& bypass);
+	void create_row_coordinates(
+		Node* node, std::vector<int>& coords, int row);
+	void create_col_coordinates(
+		Node* ndoe, std::vector<int>& coords, int col);
 
 	Node* create_child_node(Node* parent, int row, int col, char symbol);
-
 	void calculate_vector_scores(Node* node, int row, int col);
+
+
+
+	int greatest_index(int* span, int& bypass);
+
 
 	// calc player from vectors
 	void calculate_score_from_vectors(

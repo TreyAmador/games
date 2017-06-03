@@ -19,20 +19,9 @@ struct Vec2D {
 };
 
 
-long long get_init_time() {
-	return std::chrono::high_resolution_clock::now().time_since_epoch().count();
-}
-
-
-long long time_span_nanoseconds(long long init) {
-	return std::chrono::high_resolution_clock::now().time_since_epoch().count() - init;
-}
-
-
-long long time_span_milliseconds(long long init) {
-	return time_span_nanoseconds(init) / 1000000;
-}
-
+long long get_init_time();
+long long time_span_nanoseconds(long long init);
+long long time_span_milliseconds(long long init);
 
 Node* test_node_01();
 Node* test_node_02();
@@ -41,17 +30,53 @@ void test_row_and_col_heuristic();
 void test_row_heuristic_01();
 void test_row_heuristic_02(int row);
 void test_row_heuristic_03(int row);
-
 void test_col_heuristic_01(int col);
 void test_col_heuristic_02(int col);
 void test_efficiency();
-
 void test_victory();
 void test_max_row_col();
-
 void test_child_node();
+void test_next_move_choice(Game& game, IO& io);
+void time_next_choice();
 
 
+
+void time_next_choice() {
+
+	Game game;
+	IO io;
+
+	Node* parent = test_node_02();
+
+	long long init = get_init_time();
+	for (int i = 0; i < 1000000; ++i) {
+		//test_next_move_choice(game,io);
+		//std::vector<int> coords = game.query_moves_alpha(node);
+		Node* node = game.create_child_node(
+			parent, i%dim::SPAN, i%dim::SPAN, SYMBOL::EMPTY);
+		delete node;
+	}
+	std::cout << "milliseconds: " << time_span_milliseconds(init) << std::endl;
+
+}
+
+
+
+void test_next_move_choice(Game& game, IO& io) {
+
+	Node* node = test_node_01();
+	//Node* node = test_node_02();
+	//io.print_node_and_vec_score(node);
+
+	std::vector<int> coords = game.query_moves_alpha(node);
+
+	for (size_t i = 0; i < coords.size(); ++i) {
+		int row = coords[i] / dim::SPAN;
+		int col = coords[i] % dim::SPAN;
+		//std::cout << row << " " << col << std::endl;
+	}
+
+}
 
 
 void test_max_row_col() {
@@ -157,12 +182,6 @@ void test_pass_ref_ptr_int() {
 }
 
 
-
-
-
-
-
-
 void test_child_node() {
 
 	Game game;
@@ -171,13 +190,7 @@ void test_child_node() {
 	Node* parent = test_node_01();
 	io.print_node_and_vec_score(parent);
 
-
-
-
 }
-
-
-
 
 
 void test_victory() {
@@ -213,8 +226,6 @@ void test_victory() {
 		std::cout << "this didn't win" << std::endl;
 		io.print_node(node);
 	}
-
-
 
 }
 
@@ -252,7 +263,7 @@ void test_row_heuristic_01() {
 	Game game;
 	IO io;
 	Node* node = test_node_01();
-	io.print_node(node);
+	//io.print_node(node);
 	int row = 2;
 	int row_score = game.update_min_max_row(node, row, SYMBOL::PLAYER);
 	std::cout << "row " << row << ", heuristic row score: " << row_score << "\n" << std::endl;
@@ -266,7 +277,7 @@ void test_row_and_col_heuristic() {
 
 	IO io;
 	Node* node = test_node_01();
-	io.print_node(node);
+	//io.print_node(node);
 	std::cout << "\n";
 
 	std::cout << "  ";
@@ -301,7 +312,7 @@ void test_row_heuristic_03(int row) {
 	Game game;
 	IO io;
 	Node* node = test_node_01();
-	io.print_node(node);
+	//io.print_node(node);
 	int row_score = game.update_min_max_row(node, row, SYMBOL::OPPONENT);
 	std::cout << "row " << row << ", heuristic row score: " << row_score << "\n" << std::endl;
 	delete node;
@@ -329,7 +340,7 @@ void test_col_heuristic_02(int col) {
 	Game game;
 	IO io;
 	Node* node = test_node_01();
-	io.print_node(node);
+	//io.print_node(node);
 	int col_score = game.update_min_max_col(node, col, SYMBOL::OPPONENT);
 	std::cout << "col " << col << ", heuristic col score: " << col_score << "\n" << std::endl;
 	delete node;
@@ -358,13 +369,11 @@ Node* test_node_01() {
 	node->config_[44] = SYMBOL::OPPONENT;
 	node->config_[51] = SYMBOL::OPPONENT;
 
-	//Game game;
-	//for (int i = 0; i < dim::SPAN; ++i) {
-	//	node->col_score_[i] = game.update_min_max_col(node, i, SYMBOL::PLAYER);
-	//	node->row_score_[i] = game.update_min_max_row(node, i, SYMBOL::PLAYER);
-	//}
-	// this will have to have player/opponent passed in together
-	//node->alpha_ = game.calculate_score_from_vectors(node);
+	Game game;
+	for (int i = 0; i < dim::SPAN; ++i)
+		game.calculate_vector_scores(node, i, i);
+	game.calculate_score_from_vectors(
+		node, node->player_score_, node->opponent_score_);
 
 	return node;
 
@@ -394,6 +403,22 @@ Node* test_node_02() {
 }
 
 
-#endif
 
+long long get_init_time() {
+	return std::chrono::high_resolution_clock::now().time_since_epoch().count();
+}
+
+
+long long time_span_nanoseconds(long long init) {
+	return std::chrono::high_resolution_clock::now().time_since_epoch().count() - init;
+}
+
+
+long long time_span_milliseconds(long long init) {
+	return time_span_nanoseconds(init) / 1000000;
+}
+
+
+
+#endif
 

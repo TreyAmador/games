@@ -61,31 +61,74 @@ std::vector<Node*> Game::possible_configs(Node* root) {
 //		if you are beta
 //			choose highest value for opponent
 //		test while vector.size <= 5 ?
-
-
+//
+//
 std::vector<int> Game::query_moves_alpha(Node* node) {
 
-	// perhaps allocate memory right off the bat
 	std::vector<int> indices;
-
+	int row_idx = -1, col_idx = -1;
+	int fst_row = this->greatest_index(node->row_player_, row_idx),
+		fst_col = this->greatest_index(node->col_player_, col_idx);
+	int sec_row = this->greatest_index(node->row_player_, row_idx),
+		sec_col = this->greatest_index(node->col_player_, col_idx);
 	
-	int idx = -1;
-	int fst_row = this->greatest_index(node->row_player_, idx);
-	int sec_row = this->greatest_index(node->row_player_, idx);
-	idx = -1;
-	int fst_col = this->greatest_index(node->col_player_, idx);
-	int sec_col = this->greatest_index(node->col_player_, idx);
-	
+	this->create_row_coordinates(node, indices, fst_row);
+	this->create_row_coordinates(node, indices, sec_row);
+	this->create_col_coordinates(node, indices, fst_col);
+	this->create_col_coordinates(node, indices, sec_col);
 
 	return indices;
 	
 }
 
 
+void Game::create_row_coordinates(
+	Node* node, std::vector<int>& coord, int row)
+{
+	if (row == -1)
+		return;
+	for (int c = 0; c < dim::SPAN; ++c) {
+		int index = row*dim::SPAN + c;
+		char symbol = node->config_[index];
+		if (symbol != SYMBOL::EMPTY) {
+			if (c != 0 && node->config_[index-1] == SYMBOL::EMPTY)
+				this->insert_unique(coord, index-1);
+			if (c != dim::SPAN - 1 && node->config_[index+1] == SYMBOL::EMPTY)
+				this->insert_unique(coord, index+1);
+		}
+	}
+}
+
+
+void Game::create_col_coordinates(
+	Node* node, std::vector<int>& coord, int col)
+{
+	if (col == -1)
+		return;
+	for (int r = 0; r < dim::SPAN; ++r) {
+		int index = r*dim::SPAN+col;
+		char symbol = node->config_[index];
+		if (symbol != SYMBOL::EMPTY) {
+			if (r != 0 && node->config_[index-dim::SPAN] == SYMBOL::EMPTY)
+				this->insert_unique(coord,index-dim::SPAN);
+			if (r != dim::SPAN-1 && node->config_[index+dim::SPAN] == SYMBOL::EMPTY)
+				this->insert_unique(coord, index+dim::SPAN);
+		}
+	}
+}
+
+
+void Game::insert_unique(std::vector<int>& vec, int elem) {
+	for (size_t i = 0; i < vec.size(); ++i)
+		if (vec[i] == elem)
+			return;
+	vec.push_back(elem);
+}
+
 
 // this works
 int Game::greatest_index(int* config, int& bypass) {
-	int max_elem = -1, max_indx = -1;
+	int max_elem = 0, max_indx = -1;
 	for (int i = 0; i < dim::SPAN; ++i) {
 		int cur_elem = config[i];
 		if (cur_elem > max_elem && i != bypass) {
@@ -96,23 +139,6 @@ int Game::greatest_index(int* config, int& bypass) {
 	bypass = max_indx;
 	return max_indx;
 }
-
-
-/*
-int Game::greatest_index(char* config, int& bypass) {
-	char max_elem = -1;
-	int max_indx = -1;
-	for (int i = 0; i < dim::SPAN; ++i) {
-		char cur_elem = config[i];
-		if (cur_elem > max_elem && i != bypass) {
-			max_elem = cur_elem;
-			max_indx = i;
-		}
-	}
-	bypass = max_indx;
-	return max_indx;
-}
-*/
 
 
 // TODO test this
