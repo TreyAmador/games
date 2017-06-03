@@ -9,4 +9,21 @@ namespace dim {
 }
 
 
+namespace util {
+
+
+	void clear_ptrs(int* ptr) {
+		if (ptr != nullptr) {
+			delete[] ptr;
+			ptr = nullptr;
+		}
+	}
+
+
+
+}
+
+
+
 #endif
+

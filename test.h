@@ -254,16 +254,12 @@ Node* test_node_02() {
 	node->config_[36] = SYMBOL::PLAYER;
 
 
-
-
-
 	Game game;
 	for (int i = 0; i < dim::SPAN; ++i) {
 		node->col_score_[i] = game.update_min_max_col(node, i, SYMBOL::PLAYER);
 		node->row_score_[i] = game.update_min_max_row(node, i, SYMBOL::PLAYER);
 	}
 	node->alpha_ = game.calculate_alpha_from_vectors(node);
-
 
 	return node;
 }

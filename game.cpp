@@ -3,15 +3,12 @@
 #include "io.h"
 #include "global.h"
 #include <iostream>
-
-
 typedef Node* GameBoard;
 
 
 namespace {
-	const int MAX_ITER = 5;
+	const int MAX_LEAVES = 5;
 }
-
 
 
 Game::Game() {
@@ -24,26 +21,18 @@ Game::~Game() {
 }
 
 
-
-// call this method after response from other player
-// TODO fill this method, which will try all the adjacent
-//		moves from a selection of moves
-Node* Game::query_next_move(Node* root) {
-	
-	std::vector<Node*> configs = this->possible_configs(root);
-
-
-
-	return nullptr;
-}
-
-
-
 // TODO implement this where you go across row and column
-//	to get next good value, yay
+//		to get next good value
+//		perhaps check score in increments of four,
+//			then place node in position which maximizes utility
+//			relative to that four increment value
 std::vector<Node*> Game::possible_configs(Node* root) {
 
 	std::vector<Node*> nodes;
+
+
+
+
 
 	return nodes;
 }
@@ -55,142 +44,29 @@ Node* Game::create_child_node(Node* parent, int row, int col, char symbol) {
 	
 	Node* child = new Node(parent);
 	child->config_[row*dim::SPAN+col] = symbol;
-	child->col_score_[col] = this->update_min_max_col(child, col, SYMBOL::PLAYER);
-	child->row_score_[row] = this->update_min_max_row(child, row, SYMBOL::PLAYER);
+	
+	//child->col_score_[col] = this->update_min_max_col(child, col, SYMBOL::PLAYER);
+	//child->row_score_[row] = this->update_min_max_row(child, row, SYMBOL::PLAYER);
+
+	// check this
+	child->row_player_[row] = this->update_min_max_row(child, row, SYMBOL::PLAYER);
+	child->col_player_[col] = this->update_min_max_col(child, col, SYMBOL::PLAYER);
+	child->row_opponent_[row] = this->update_min_max_row(child, row, SYMBOL::OPPONENT);
+	child->col_opponent_[col] = this->update_min_max_col(child, col, SYMBOL::OPPONENT);
+
+
+
+	// player or opponent score ...?
+	// this will have to be revised ...
+	child->player_score_ = this->calculate_score_from_vectors(child);
 	child->parent_ = parent;
+
 	return child;
 
 }
 
 
-
-/*
-
-// TODO implement cut-off dfs which returns next
-//		most adventageous move
-//		should probably query opponent score first
-//		and go with that if it's too high
-//		go with your own if it's better
-
-//		once you make a move, put it in the taken_spaces_ vector
-Node* Game::dfs_next_move(Node* root) {
-	int iter = 0;
-	node_dfs_.push(root);
-	while (!node_dfs_.empty() && iter < MAX_ITER) {
-		Node* node = node_dfs_.top();
-		node_dfs_.pop();
-		for (size_t i = 0; i < taken_spaces_.size(); ++i) {
-			this->query_adjacent(node,i);
-		}
-		++iter;
-	}
-	// TODO implement another data structure which stores 
-	//		nodes based on heuristic and return top one
-	//		or just have a running best and return that
-	//		priority queue?
-	return nullptr;
-}
-
-*/
-
-
-/*
-// check left, right, up, down for next best move
-void Game::query_adjacent(Node* node, int i) {
-	Coordinate coord = taken_spaces_[i];
-	bool up = true, down = true, left = true, right = true;
-	for (int i = 1; i <= 3; ++i) {
-		this->query_right(node, coord, i, right);
-	}
-}
-*/
-
-
-
-// TODO simply place these in a stack
-void Game::query_right(Node* node, Coordinate& coord, int offset, bool& open) {
-	int index = coord.row_*dim::SPAN + coord.col_ + offset;
-	if (index % dim::SPAN == 0)
-		open = false;
-	//else if (open && node->config_[index] == SYMBOL::EMPTY)
-	//	taken_spaces_.push_back({ SYMBOL::EMPTY, coord.row_, coord.col_ + offset });
-}
-
-
-
-
-
-/*
-
-
-// check left, right, up, down for next best move
-void Game::query_adjacent(Node* node) {
-	Coordinate coord = adjacent_spaces_.front();
-	bool up = true, down = true, left = true, right = true;
-	for (int i = 1; i <= 3; ++i) {
-		this->query_right(node, coord, i, right);
-		this->query_left(node, coord, i*(-1), left);
-		this->query_up(node, coord, i*(-1), up);
-		this->query_down(node, coord, i, down);
-	}
-}
-
-
-
-// are these less efficient than just checking?
-
-// TODO simply place these in a stack
-void Game::query_right(Node* node, Coordinate& coord, int offset, bool& open) {
-	int index = coord.row_*dim::SPAN+coord.col_+offset;
-	if (index % dim::SPAN == 0)
-		open = false;
-	else if (open && node->config_[index] == SYMBOL::EMPTY)
-		adjacent_spaces_.push({ SYMBOL::EMPTY, coord.row_, coord.col_+offset });
-	// can just push a new node here
-}
-
-*/
-
-void Game::query_left(Node* node, Coordinate& coord, int offset, bool& open) {
-	int index = coord.row_*dim::SPAN + coord.col_ + offset;
-	if (index % dim::SPAN == dim::SPAN-1)
-		open = false;
-	//else if (open && node->config_[index] == SYMBOL::EMPTY)
-	//	taken_spaces_.push_back({ SYMBOL::EMPTY, coord.row_, coord.col_+offset });
-}
-
-
-void Game::query_up(Node* node, Coordinate& coord, int offset, bool& open) {
-	int index = (coord.row_ + offset)*dim::SPAN + coord.col_;
-	if (index / dim::SPAN == -1)
-		open = false;
-	//else if (open && node->config_[index] == SYMBOL::EMPTY)
-	//	taken_spaces_.push_back({ SYMBOL::EMPTY, coord.row_ + offset, coord.col_ });
-}
-
-
-void Game::query_down(Node* node, Coordinate& coord, int offset, bool& open) {
-	int index = (coord.row_+offset)*dim::SPAN + coord.col_;
-	if (index / dim::SPAN == dim::SPAN)
-		open = false;
-	//else if (open && node->config_[index] == SYMBOL::EMPTY)
-	//	taken_spaces_.push_back({ SYMBOL::EMPTY, coord.row_ + offset, coord.col_ });
-}
-
-
-// TODO implement this
-//		allow node to be passed, sum the row and column
-//		of change of node with the rows and columns of score_tracker_
-int Game::sum_score_new_row_col(Node* node, int row, int col) {
-	int sum = 0;
-	for (int r = 0; r < dim::SPAN; ++r) {
-		
-	}
-	return 0;
-}
-
-
-int Game::calculate_alpha_from_vectors(Node* node) {
+int Game::calculate_score_from_vectors(Node* node) {
 	int sum = 0;
 	for (int i = 0; i < dim::SPAN; ++i)
 		sum += node->row_score_[i] + node->col_score_[i];
@@ -308,75 +184,7 @@ bool Game::won_game(Node* node, char symbol) {
 // it will reset everything
 void Game::reset_game_board() {
 	
-	//while (!node_dfs_.empty()) {
-	//	Node* node = node_dfs_.top();
-	//	node_dfs_.pop();
-	//	if (node != nullptr) {
-	//		delete node;
-	//		node = nullptr;
-	//	}
-	//}
-	
-	// clear all the taken nodes
-	//taken_spaces_.clear();
-	//taken_spaces_.shrink_to_fit();
 
 }
 
 
-
-
-/*
-// TESTING FUNCTIONS
-
-void Game::test_fill_score_tracker(Node* node) {
-
-	for (int i = 0; i < dim::SPAN; ++i) {
-		score_counter_.row_[i] = this->update_min_max_row(node, i, SYMBOL::PLAYER, SYMBOL::OPPONENT);
-		score_counter_.col_[i] = this->update_min_max_col(node, i, SYMBOL::PLAYER, SYMBOL::OPPONENT);
-	}
-
-	std::cout << "  ";
-	for (int i = 0; i < dim::SPAN; ++i)
-		std::cout << score_counter_.col_[i] << " ";
-	std::cout << "\n";
-	for (int i = 0; i < dim::SPAN; ++i)
-		std::cout << score_counter_.row_[i] << "\n";
-
-}
-
-
-Node* Game::test_node_01() {
-	IO io;
-	Node* node = new Node;
-	GameBoard board = node;
-	std::cout << "game board node" << std::endl;
-	io.print_node(static_cast<Node*>(board));
-	node->config_[3] = SYMBOL::PLAYER;
-	node->config_[11] = SYMBOL::PLAYER;
-	node->config_[19] = SYMBOL::PLAYER;
-	node->config_[12] = SYMBOL::PLAYER;
-	node->config_[13] = SYMBOL::PLAYER;
-	node->config_[54] = SYMBOL::PLAYER;
-	node->config_[56] = SYMBOL::PLAYER;
-	node->config_[60] = SYMBOL::PLAYER;
-	node->config_[4] = SYMBOL::OPPONENT;
-	node->config_[5] = SYMBOL::OPPONENT;
-	node->config_[13] = SYMBOL::OPPONENT;
-	node->config_[42] = SYMBOL::OPPONENT;
-	node->config_[43] = SYMBOL::OPPONENT;
-	node->config_[44] = SYMBOL::OPPONENT;
-	node->config_[51] = SYMBOL::OPPONENT;
-	return node;
-}
-
-
-void Game::test_node_querying() {
-	IO io;
-	Node* node = this->test_node_01();
-	io.print_node(node);
-	this->test_fill_score_tracker(node);
-	delete node;
-}
-
-*/
