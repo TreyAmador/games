@@ -3,6 +3,7 @@
 #include <vector>
 #include <queue>
 #include <stack>
+#include "io.h"
 struct Node;
 
 
@@ -21,8 +22,18 @@ public:
 	~Game();
 
 	
+	// seems to be working...
+	// TODO need to sort through the code to see where
+	//		scores should be attributed to player vs opponent
+	//		and calculate utility function
+	int minimax(Node* node, int depth, bool maximize);
+
+
+	
 	// pass in node, get all adjacent nodes
 	std::vector<Node*> possible_configs(Node* root);
+
+	// should probably pass in SYMBOL::SYMBOL ? 
 	std::vector<int> query_moves_alpha(Node* node);
 	
 	void insert_unique(std::vector<int>& vec, int elem);
@@ -70,6 +81,8 @@ public:
 
 
 private:
+	IO io_;
+	
 	// indicates if you go first or not
 	// true when you go first
 	// can be used to call alpha aka maximize methods

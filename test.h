@@ -36,8 +36,31 @@ void test_efficiency();
 void test_victory();
 void test_max_row_col();
 void test_child_node();
-void test_next_move_choice(Game& game, IO& io);
+void test_next_move_choice(Game& game, IO& io, Node* node);
 void time_next_choice();
+void test_child_configs();
+
+
+
+
+
+
+
+void test_child_configs() {
+
+	Game game;
+	IO io;
+
+	Node* node = test_node_02();
+	io.print_node_and_vec_score(node);
+
+	std::vector<Node*> offspring = game.possible_configs(node);
+	for (size_t i = 0; i < offspring.size(); ++i) {
+		io.print_config(offspring[i]);
+	}
+
+}
+
 
 
 
@@ -49,12 +72,12 @@ void time_next_choice() {
 	Node* parent = test_node_02();
 
 	long long init = get_init_time();
-	for (int i = 0; i < 1000000; ++i) {
-		//test_next_move_choice(game,io);
+	for (int i = 0; i < 100000; ++i) {
+		test_next_move_choice(game,io,parent);
 		//std::vector<int> coords = game.query_moves_alpha(node);
-		Node* node = game.create_child_node(
-			parent, i%dim::SPAN, i%dim::SPAN, SYMBOL::EMPTY);
-		delete node;
+		//Node* node = game.create_child_node(
+		//	parent, i%dim::SPAN, i%dim::SPAN, SYMBOL::EMPTY);
+		//delete node;
 	}
 	std::cout << "milliseconds: " << time_span_milliseconds(init) << std::endl;
 
@@ -62,9 +85,9 @@ void time_next_choice() {
 
 
 
-void test_next_move_choice(Game& game, IO& io) {
+void test_next_move_choice(Game& game, IO& io, Node* node) {
 
-	Node* node = test_node_01();
+	//Node* node = test_node_01();
 	//Node* node = test_node_02();
 	//io.print_node_and_vec_score(node);
 

@@ -28,16 +28,55 @@ Game::~Game() {
 }
 
 
+
+int Game::minimax(Node* node, int depth, bool maximize) {
+
+	if (depth == 0) {
+		//std::cout << "\n" << node->player_score_ << "\n\n" << std::endl;
+		return node->player_score_;
+	}
+
+	if (maximize) {
+		int best_value = -10000;
+		std::vector<Node*> nodes = this->possible_configs(node);
+		for (size_t i = 0; i < nodes.size(); ++i) {
+			int value = this->minimax(nodes[i], depth - 1, false);
+			best_value = value > best_value ? value : best_value;
+			io_.print_node_and_vec_score(nodes[i]);
+		}
+		std::cout << "Maximize best val: " << best_value << "\n\n" << std::endl;
+		return best_value;
+	}
+	else {
+		int best_value = 10000;
+		std::vector<Node*> nodes = this->possible_configs(node);
+		for (size_t i = 0; i < nodes.size(); ++i) {
+			int value = this->minimax(nodes[i], depth - 1, true);
+			best_value = value < best_value ? value : best_value;
+			io_.print_node_and_vec_score(nodes[i]);
+		}
+		std::cout << "Minimize best val: " << best_value << "\n\n" << std::endl;
+		return best_value;
+	}
+}
+
+
+
+
 // TODO implement this where you go across row and column
 //		to get next good value
 //		perhaps check score in increments of four,
 //			then place node in position which maximizes utility
 //			relative to that four increment value
+//		make this more efficient!!!!
+
 std::vector<Node*> Game::possible_configs(Node* root) {
-
 	std::vector<Node*> nodes;
-
-
+	std::vector<int> indices = this->query_moves_alpha(root);
+	for (size_t i = 0; i < indices.size(); ++i) {
+		nodes.push_back(this->create_child_node(root,
+			indices[i]/dim::SPAN,indices[i]%dim::SPAN,SYMBOL::PLAYER));
+	}
 	return nodes;
 }
 
@@ -82,6 +121,8 @@ std::vector<int> Game::query_moves_alpha(Node* node) {
 }
 
 
+
+// TODO make more efficient
 void Game::create_row_coordinates(
 	Node* node, std::vector<int>& coord, int row)
 {
@@ -100,6 +141,7 @@ void Game::create_row_coordinates(
 }
 
 
+// TODO make more efficient
 void Game::create_col_coordinates(
 	Node* node, std::vector<int>& coord, int col)
 {
