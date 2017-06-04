@@ -27,7 +27,11 @@ public:
 	//		scores should be attributed to player vs opponent
 	//		and calculate utility function
 	int minimax(Node* node, int depth, bool maximize);
+	int minimize(Node* node, int depth);
+	int maximize(Node* node, int depth);
 
+
+	//int make_move(Node* node);
 	//int minimize(Node* node, int depth);
 	//int maximize(Node* node, int depth);
 
@@ -36,6 +40,7 @@ public:
 	std::vector<Node*> possible_configs(Node* root, char symbol);
 
 	int calculate_config_score(Node* node);
+	int calculate_config_score(Node* node, char symbol);
 
 
 	std::vector<int> query_possible_moves(Node* node);
@@ -76,6 +81,11 @@ public:
 
 	Node* get_best_node();
 
+	int get_best_move();
+
+	Coordinate get_best_coordinate();
+
+
 	//void find_taken_move(Node*);
 
 
@@ -107,6 +117,8 @@ private:
 	Node* best_node_;
 
 	Coordinate best_coordinate_;
+
+	int best_move_;
 
 
 };

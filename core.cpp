@@ -20,18 +20,28 @@ int Core::run() {
 	Game game;
 	IO io;
 
-	//Node* parent = test_node_02();
-	//io.print_config(parent);
+	Node* parent = test_node_02();
+	
+	io.print_config(parent);
 
-	//int max = game.minimax(parent, 1, true);
-	//std::cout << max << std::endl;
+	int max = game.minimax(parent,5, true);
+	std::cout << max << std::endl;
+
+	io.print_config(parent);
+
+	int move = game.get_best_move();
+	parent->config_[move] = '!';
+
+	io.print_config(parent);
+
+
 
 	//Node* next_move = game.get_best_node();
 	//io.print_config(next_move);
 
 	//test_calc_config();
 
-	test_query_possible_moves();
+	//test_query_possible_moves();
 
 
 	//if (io.player_moves_first()) {

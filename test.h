@@ -1,3 +1,8 @@
+
+
+
+/*
+
 #ifndef TEST_H_
 #define TEST_H_
 #include "node.h"
@@ -68,7 +73,6 @@ void test_query_possible_moves() {
 	std::vector<int> moves = game.query_possible_moves(node);
 
 	std::cout << "\n" << std::endl;
-
 	for (size_t i = 0; i < moves.size(); ++i) {
 		std::cout << 
 			"row: " << static_cast<char>(moves[i]/dim::SPAN+'A') << "  " << 
@@ -505,4 +509,7 @@ long long time_span_milliseconds(long long init) {
 
 
 #endif
+
+*/
+
 

@@ -2,6 +2,7 @@
 #include "node.h"
 #include "io.h"
 #include <iostream>
+#include <climits>
 
 
 namespace {
@@ -14,7 +15,9 @@ typedef Node* GameBoard;
 
 Game::Game() : 
 	best_node_(new Node)
-{}
+{
+	this->best_move_ = -1;
+}
 
 
 Game::~Game() {
@@ -27,64 +30,62 @@ Game::~Game() {
 
 int Game::minimax(Node* node, int depth, bool maximize) {
 
-	if (depth == 0) {
-		return node->player_score_;
-	}
-
-	if (this->won_game(node, SYMBOL::PLAYER)) {
-		return node->player_score_;
-	}
-	if (this->won_game(node, SYMBOL::OPPONENT)) {
-		return node->opponent_score_;
+	if (this->won_game(node, SYMBOL::PLAYER) ||
+		this->won_game(node, SYMBOL::OPPONENT) ||
+		depth == 0) 
+	{
+		return //this->calculate_config_score(node, SYMBOL::PLAYER);
+			this->calculate_config_score(node, SYMBOL::PLAYER) -
+			this->calculate_config_score(node, SYMBOL::OPPONENT);
 	}
 
 	if (maximize) {
-		int best_value = -10000;
-		//std::vector<Node*> nodes = this->possible_configs(node, SYMBOL::PLAYER);
-		std::vector<int> moves = this->query_moves_alpha(node, SYMBOL::PLAYER);
-		
+		int best_value = INT_MIN;
+		std::vector<int> moves = this->query_possible_moves(node);
 		for (size_t i = 0; i < moves.size(); ++i) {
-
 			node->config_[moves[i]] = SYMBOL::PLAYER;
-			// TODO calculate the player scores!
-			this->calculate_config_score(node);
-
-
-
-
-
 			int value = this->minimax(node, depth - 1, false);
-			// very temporary!
 			if (value > best_value) {
-				
-				
 				best_value = value;
+				this->best_move_ = moves[i];
+
+				std::cout << depth << " " << value << " " << moves[i] << std::endl;
+
 			}
 		}
-		
+		for (size_t i = 0; i < moves.size(); ++i)
+			node->config_[moves[i]] = SYMBOL::EMPTY;
 		return best_value;
 	}
 	else {
-		int best_value = 10000;
-		std::vector<Node*> nodes = this->possible_configs(node, SYMBOL::OPPONENT);
-		for (size_t i = 0; i < nodes.size(); ++i) {
-			int value = this->minimax(nodes[i], depth - 1, true);
-			// very temporary!
+		int best_value = INT_MAX;
+		std::vector<int> moves = this->query_possible_moves(node);
+		for (size_t i = 0; i < moves.size(); ++i) {
+			node->config_[moves[i]] = SYMBOL::OPPONENT;
+			int value = this->minimax(node, depth - 1, true);
 			if (value < best_value) {
-				//this->copy_config(best_node_, node);
-				this->copy_config(best_node_, nodes[i]);
 				best_value = value;
+				this->best_move_ = moves[i];
+
+				std::cout << depth << " " << value << " "  << moves[i] << std::endl;
+
 			}
 		}
-		this->clear_nodes(nodes);
+		for (size_t i = 0; i < moves.size(); ++i)
+			node->config_[moves[i]] = SYMBOL::EMPTY;
 		return best_value;
 	}
 }
 
 
+int Game::minimize(Node* node, int depth) {
+	return 0;
+}
 
 
-
+int Game::maximize(Node* node, int depth) {
+	return 1;
+}
 
 
 
@@ -219,6 +220,16 @@ int Game::calculate_config_score(Node* node) {
 		node->opponent_score_ += this->update_min_max_col(node, i, SYMBOL::OPPONENT);
 	}
 	return 0;
+}
+
+
+int Game::calculate_config_score(Node* node, char symbol) {
+	int score = 0;
+	for (int i = 0; i < dim::SPAN; ++i) {
+		score += this->update_min_max_row(node, i, symbol);
+		score += this->update_min_max_col(node, i, symbol);
+	}
+	return score;
 }
 
 
@@ -427,6 +438,21 @@ void Game::copy_config(Node* target, Node* source) {
 
 Node* Game::get_best_node() {
 	return this->best_node_;
+}
+
+
+int Game::get_best_move() {
+	return this->best_move_;
+}
+
+
+Coordinate Game::get_best_coordinate() {
+
+	Coordinate coordinate;
+	coordinate.row_ = this->best_move_ / dim::SPAN;
+	coordinate.col_ = this->best_move_ % dim::SPAN;
+	return coordinate;
+
 }
 
 
