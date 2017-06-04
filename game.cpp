@@ -13,65 +13,14 @@ namespace {
 typedef Node* GameBoard;
 
 
-Game::Game() : 
-	best_node_(new Node)
-{
-	this->best_move_ = -1;
+Game::Game() {
+
 }
 
 
 Game::~Game() {
 	
 }
-
-
-/*
-
-int Game::minimax(Node* node, int depth, bool maximize) {
-
-	if (this->won_game(node, SYMBOL::PLAYER) ||
-		this->won_game(node, SYMBOL::OPPONENT) ||
-		depth == 0) 
-	{
-		return
-			this->calculate_config_score(node, SYMBOL::PLAYER) -
-			this->calculate_config_score(node, SYMBOL::OPPONENT);
-	}
-
-	if (maximize) {
-		int best_value = INT_MIN;
-		std::vector<int> moves = this->query_possible_moves(node);
-		for (size_t i = 0; i < moves.size(); ++i) {
-			node->config_[moves[i]] = SYMBOL::PLAYER;
-			int value = this->minimax(node, depth - 1, false);
-			if (value > best_value) {
-				best_value = value;
-				this->best_move_ = moves[i];
-			}
-		}
-		for (size_t i = 0; i < moves.size(); ++i)
-			node->config_[moves[i]] = SYMBOL::EMPTY;
-		return best_value;
-	}
-	else {
-		int best_value = INT_MAX;
-		std::vector<int> moves = this->query_possible_moves(node);
-		for (size_t i = 0; i < moves.size(); ++i) {
-			node->config_[moves[i]] = SYMBOL::OPPONENT;
-			int value = this->minimax(node, depth - 1, true);
-			if (value < best_value) {
-				best_value = value;
-				this->best_move_ = moves[i];
-			}
-		}
-		for (size_t i = 0; i < moves.size(); ++i)
-			node->config_[moves[i]] = SYMBOL::EMPTY;
-		return best_value;
-	}
-}
-
-*/
-
 
 
 void Game::next_move(Node* node, int depth) {
@@ -98,15 +47,17 @@ int Game::minimize(Node* node, int depth) {
 
 	int best = INT_MAX;
 	int score;
-	if (this->won_game(node, SYMBOL::PLAYER))
-		return INT_MAX;
-	if (this->won_game(node, SYMBOL::OPPONENT))
-		return INT_MIN;
+	if (this->won_game(node, SYMBOL::PLAYER)) {
+		return
+			this->calculate_config_score(node, SYMBOL::PLAYER);
+	}
+	if (this->won_game(node, SYMBOL::OPPONENT)) {
+		return
+			this->calculate_config_score(node, SYMBOL::PLAYER);
+	}
 	if (depth == 0) {
-		//return
-		//	this->calculate_config_score(node, SYMBOL::PLAYER) - 
-		//	this->calculate_config_score(node, SYMBOL::OPPONENT);
-		return this->calculate_config_score(node, SYMBOL::PLAYER);
+		return
+			this->calculate_config_score(node, SYMBOL::PLAYER);
 	}
 
 	std::vector<int> moves = this->query_possible_moves(node);
@@ -126,15 +77,17 @@ int Game::maximize(Node* node, int depth) {
 
 	int best = INT_MIN;
 	int score;
-	if (this->won_game(node, SYMBOL::PLAYER))
-		return INT_MAX;
-	if (this->won_game(node, SYMBOL::OPPONENT))
-		return INT_MIN;
+	if (this->won_game(node, SYMBOL::PLAYER)) {
+		return
+			this->calculate_config_score(node, SYMBOL::PLAYER);
+	}
+	if (this->won_game(node, SYMBOL::OPPONENT)) {
+		return 
+			this->calculate_config_score(node, SYMBOL::PLAYER);
+	}
 	if (depth == 0) {
-		//return
-		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
-		//	this->calculate_config_score(node, SYMBOL::OPPONENT);
-		return this->calculate_config_score(node, SYMBOL::PLAYER);
+		return 
+			this->calculate_config_score(node, SYMBOL::PLAYER);
 	}
 
 	std::vector<int> moves = this->query_possible_moves(node);
@@ -272,6 +225,7 @@ void Game::clear_nodes(std::vector<Node*>& nodes) {
 }
 
 
+/*
 
 Node* Game::get_best_node() {
 	return this->best_node_;
@@ -291,6 +245,8 @@ Coordinate Game::get_best_coordinate() {
 	return coordinate;
 
 }
+
+*/
 
 
 // this works

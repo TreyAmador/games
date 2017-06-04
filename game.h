@@ -1,9 +1,6 @@
 #ifndef GAME_H_
 #define GAME_H_
 #include <vector>
-#include <queue>
-#include <stack>
-#include "io.h"
 struct Node;
 
 
@@ -76,18 +73,7 @@ public:
 
 
 private:
-	IO io_;
 	
-	// indicates if you go first or not
-	// true when you go first
-	// can be used to call alpha aka maximize methods
-	bool is_alpha_;
-
-	Node* best_node_;
-
-	Coordinate best_coordinate_;
-
-	int best_move_;
 
 
 };
