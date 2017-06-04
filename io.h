@@ -11,22 +11,21 @@ public:
 	IO();
 	~IO();
 
-	bool player_moves_first();
+	bool computer_moves_first();
 	int time_allowed();
-	bool valid_move();
+	int enter_next_move(Node* node);
+	int next_move_validity(Node* node, std::string& input);
 
 
 	void print_node(Node* node);
-	void print_config(Node* node);
-	void print_node_and_vec_score(Node* node);
-
-
+	
 
 private:
 
 
 
 };
+
 
 #endif
 

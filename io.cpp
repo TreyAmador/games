@@ -3,6 +3,12 @@
 #include "io.h"
 
 
+
+namespace {
+	const int IMPROPER_INPUT = -1;
+}
+
+
 IO::IO() {
 
 }
@@ -13,16 +19,16 @@ IO::~IO() {
 }
 
 
-bool IO::player_moves_first() {
+bool IO::computer_moves_first() {
 	do {
 		std::cout << 
-			"Who should move first, (p)layer or (o)pponent?" << "\n";
+			"Who should move first, (c)omputer or (h)uman?" << "\n";
 		std::string buffer;
 		std::cin >> buffer;
-		if (buffer[0] != 'p' && buffer[0] != 'o')
-			std::cout << "Error, improper input" << "\n";
+		if (buffer[0] != 'c' && buffer[0] != 'h')
+			std::cout << "Error, improper input!" << "\n";
 		else
-			return buffer[0] == 'p';
+			return buffer[0] == 'c';
 	} while (true);
 }
 
@@ -38,22 +44,51 @@ int IO::time_allowed() {
 		else if (buffer[0] == '3' && buffer[1] == '0')
 			return 30;
 		else
-			std::cout << "Error, imporper input" << "\n";
+			std::cout << "Error, imporper input!" << "\n";
 	} while (true);
 }
 
 
-
-
-void IO::print_node(Node* node) {
-	this->print_config(node);
-	std::cout << "\n" <<
-		"Alpha " << node->alpha_ << "\n" <<
-		"Beta  " << node->beta_ << "\n" << std::endl;
+int IO::enter_next_move(Node* node) {
+	do {
+		std::cout <<
+			"Enter your next move." << "\n" <<
+			"First, a row between 'a' and 'h', and then" << 
+			" a column between '1' and '8'." << "\n";
+		std::string input;
+		std::cin >> input;
+		int next_move = IMPROPER_INPUT;
+		if ((next_move = this->next_move_validity(node, input)) != IMPROPER_INPUT)
+			return next_move;
+		else
+			std::cout << "Error, improper input!" << "\n\n";
+	} while (true);
 }
 
 
-void IO::print_config(Node* node) {
+int IO::next_move_validity(Node* node, std::string& input) {
+	
+	if (input.size() < 2)
+		return IMPROPER_INPUT;
+	char row_c = input[0], col_c = input[1];
+	if (row_c < 'a' || row_c > 'h')
+		return IMPROPER_INPUT;
+	if (col_c < '1' || col_c > '8')
+		return IMPROPER_INPUT;
+
+	int row = static_cast<int>(row_c-'a');
+	int col = static_cast<int>(col_c-'1');
+
+	int element = row*dim::SPAN+col;
+	if (node->config_[element] != SYMBOL::EMPTY)
+		return IMPROPER_INPUT;
+	else
+		return element;
+
+}
+
+
+void IO::print_node(Node* node) {
 	std::cout << "  ";
 	for (int i = 0; i < dim::SPAN; ++i)
 		std::cout << i + 1 << " ";
@@ -64,33 +99,5 @@ void IO::print_config(Node* node) {
 		std::cout << node->config_[i] << " ";
 	}
 	std::cout << "\n" << std::endl;
-}
-
-
-// a messy method!
-void IO::print_node_and_vec_score(Node* node) {
-
-	std::cout << "Plr     ";
-	for (int i = 0; i < dim::SPAN; ++i)
-		std::cout << node->col_player_[i] << " ";
-	std::cout << "\n\n" << "   Opp  ";
-	for (int i = 0; i < dim::SPAN; ++i)
-		std::cout << node->col_opponent_[i] << " ";
-	std::cout << "\n\n" << "        ";
-
-	for (int i = 0; i < dim::SPAN; ++i)
-		std::cout << i + 1 << " ";
-	for (int i = 0; i < dim::SIZE; ++i) {
-		if (i % dim::SPAN == 0) {
-			std::cout << "\n" << node->row_player_[i/dim::SPAN] << "  ";
-			std::cout << node->row_opponent_[i/dim::SPAN] << "  ";
-			std::cout << static_cast<char>('A'+i/dim::SPAN) << " ";
-		}
-		std::cout << node->config_[i] << " ";
-	}
-	std::cout << "\n\n" <<
-		"Player score    " << node->player_score_ << "\n" <<
-		"Opponent score  " << node->opponent_score_ << "\n\n" << std::endl;
-
 }
 

@@ -22,10 +22,47 @@ Game::~Game() {
 }
 
 
+// TODO implement minimizing or maximizing player ability
+void Game::next_move(Node* node, int max_depth) {
 
-// TODO pass a bool to determine if you as a player
-//		are the maximizing or minimizing player
-void Game::next_move(Node* node, int depth) {
+	int best_score = 0;
+	int best_element = -1;
+	int depth = 0;
+
+	while (depth < max_depth) {
+		int element = this->move_iteration(node, depth);
+		int score = this->calculate_config_score(node, SYMBOL::PLAYER);
+		if (score > best_score) {
+			best_score = score;
+			best_element = element;
+		}
+		node->config_[element] = SYMBOL::EMPTY;
+		++depth;
+	}
+
+	node->config_[best_element] = SYMBOL::PLAYER;
+}
+
+
+// TODO next move tailoring
+//
+//
+//		determine if you are maximizing or minimizing player
+//			the symbol to actually use, SYMBOL or bool
+//				pass a char symbol SYMBOL::PLAYER or SYMBOL::OPPONENT
+//				to determine if you as a player are 
+//				the maximizing or minimizing player ?
+//			perhaps have different methods based on 
+//			player heuristic or opponent heuristic
+//
+//
+//		iterative deepening
+//			implement as a loop which increments depth of iteration
+//			where you compare heuristic between iterations ...
+//
+//
+
+int Game::move_iteration(Node* node, int depth) {
 	
 	int best = INT_MIN;
 	int score = 0;
@@ -44,6 +81,7 @@ void Game::next_move(Node* node, int depth) {
 		node->config_[moves[i]] = SYMBOL::EMPTY;
 	}
 	node->config_[element] = SYMBOL::PLAYER;
+	return element;
 }
 
 
@@ -52,31 +90,25 @@ int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 	int best = INT_MAX;
 	int score;
 
-	if (this->won_game(node, SYMBOL::PLAYER)) {
-		return
-			this->calculate_config_score(node, SYMBOL::PLAYER);
-	}
-	if (this->won_game(node, SYMBOL::OPPONENT)) {
-		return
-			this->calculate_config_score(node, SYMBOL::PLAYER);
-	}
-	if (depth == 0) {
-		return
-			this->calculate_config_score(node, SYMBOL::PLAYER);
-	}
+	if (this->won_game(node, SYMBOL::PLAYER))
+		return this->calculate_config_score(node, SYMBOL::PLAYER);
+	if (this->won_game(node, SYMBOL::OPPONENT))
+		return this->calculate_config_score(node, SYMBOL::PLAYER);
+	if (depth == 0)
+		return this->calculate_config_score(node, SYMBOL::PLAYER);
 
 	std::vector<int> moves = this->query_possible_moves(node);
 	for (size_t i = 0; i < moves.size(); ++i) {
+
 		node->config_[moves[i]] = SYMBOL::OPPONENT;
 		score = this->maximize(node, alpha, beta, depth - 1);
-		if (score < best) {
+		if (score < best)
 			best = score;
-		}
 		node->config_[moves[i]] = SYMBOL::EMPTY;
+
 		alpha = alpha > score ? alpha : score;
-		if (alpha > beta) {
+		if (alpha > beta)
 			break;
-		}
 	}
 	return best;
 }
@@ -87,31 +119,25 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 	int best = INT_MIN;
 	int score;
 
-	if (this->won_game(node, SYMBOL::PLAYER)) {
-		return
-			this->calculate_config_score(node, SYMBOL::PLAYER);
-	}
-	if (this->won_game(node, SYMBOL::OPPONENT)) {
-		return 
-			this->calculate_config_score(node, SYMBOL::PLAYER);
-	}
-	if (depth == 0) {
-		return 
-			this->calculate_config_score(node, SYMBOL::PLAYER);
-	}
+	if (this->won_game(node, SYMBOL::PLAYER))
+		return this->calculate_config_score(node, SYMBOL::PLAYER);
+	if (this->won_game(node, SYMBOL::OPPONENT))
+		return this->calculate_config_score(node, SYMBOL::PLAYER);
+	if (depth == 0)
+		return this->calculate_config_score(node, SYMBOL::PLAYER);
 
 	std::vector<int> moves = this->query_possible_moves(node);
 	for (size_t i = 0; i < moves.size(); ++i) {
+		
 		node->config_[moves[i]] = SYMBOL::PLAYER;
 		score = this->minimize(node, alpha, beta, depth - 1);
-		if (score > best) {
+		if (score > best)
 			best = score;
-		}
 		node->config_[moves[i]] = SYMBOL::EMPTY;
+
 		beta = beta < score ? beta : score;
-		if (alpha > beta) {
+		if (alpha > beta)
 			break;
-		}
 	}
 	return best;
 }
@@ -135,14 +161,14 @@ std::vector<int> Game::query_possible_moves(Node* node) {
 		for (int c = 0; c < dim::SPAN; ++c) {
 			int index = r*dim::SPAN+c;
 			if (node->config_[index] != SYMBOL::EMPTY) {
-				if (r != 0 && node->config_[index - 1] == SYMBOL::EMPTY)
-					this->insert_unique(moves, index - 1);
-				if (r != dim::SPAN && node->config_[index + 1] == SYMBOL::EMPTY)
-					this->insert_unique(moves, index + 1);
-				if (c != 0 && node->config_[index - dim::SPAN] == SYMBOL::EMPTY)
-					this->insert_unique(moves, index - dim::SPAN);
-				if (c != dim::SPAN && node->config_[index + dim::SPAN] == SYMBOL::EMPTY)
-					this->insert_unique(moves, index + dim::SPAN);
+				if (r != 0 && node->config_[index-1] == SYMBOL::EMPTY)
+					this->insert_unique(moves, index-1);
+				if (r != dim::SPAN && node->config_[index+1] == SYMBOL::EMPTY)
+					this->insert_unique(moves, index+1);
+				if (c != 0 && node->config_[index-dim::SPAN] == SYMBOL::EMPTY)
+					this->insert_unique(moves, index-dim::SPAN);
+				if (c != dim::SPAN && node->config_[index+dim::SPAN] == SYMBOL::EMPTY)
+					this->insert_unique(moves, index+dim::SPAN);
 			}
 		}
 	}
@@ -217,7 +243,6 @@ void Game::place_symbol_by_indeces(Node* node, char symbol, int row, int col) {
 void Game::place_symbol_from_prompt(Node* node, char symbol, int row, int col) {
 	node->config_[(row-1)*dim::SPAN+(col-1)] = symbol;
 }
-
 
 
 void Game::clear_nodes(std::vector<Node*>& nodes) {

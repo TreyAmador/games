@@ -17,7 +17,9 @@ public:
 	Game();
 	~Game();
 
-	void next_move(Node* node, int depth);
+	void next_move(Node* node, int max_depth);
+	int move_iteration(Node* node, int depth);
+
 	int minimize(Node* node, int& alpha, int& beta, int depth);
 	int maximize(Node* node, int& alpha, int& beta, int depth);
 	

@@ -50,13 +50,13 @@ void test_heuristic_diff() {
 	Node* node = test_node_01();
 	
 	node->config_[35] = SYMBOL::PLAYER;
-	io.print_config(node);
+	io.print_node(node);
 	std::cout << 
 		game.calculate_config_score(node, SYMBOL::PLAYER) << "\n" << std::endl;
 	node->config_[35] = SYMBOL::EMPTY;
 
 	node->config_[36] = SYMBOL::PLAYER;
-	io.print_config(node);
+	io.print_node(node);
 	std::cout << 
 		game.calculate_config_score(node, SYMBOL::PLAYER) << "\n" << std::endl;
 	node->config_[36] = SYMBOL::EMPTY;
