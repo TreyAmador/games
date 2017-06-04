@@ -14,6 +14,38 @@ IO::~IO() {
 }
 
 
+bool IO::player_moves_first() {
+	do {
+		std::cout << 
+			"Who should move first, (p)layer or (o)pponent?" << "\n";
+		std::string buffer;
+		std::cin >> buffer;
+		if (buffer[0] != 'p' && buffer[0] != 'o')
+			std::cout << "Error, improper input" << "\n";
+		else
+			return buffer[0] == 'p';
+	} while (true);
+}
+
+
+int IO::time_allowed() {
+	do {
+		std::cout << 
+			"How much time should be allotted, 5 or 30 seconds?" << "\n";
+		std::string buffer;
+		std::cin >> buffer;
+		if (buffer[0] == '5')
+			return 5;
+		else if (buffer[0] == '3' && buffer[1] == '0')
+			return 30;
+		else
+			std::cout << "Error, imporper input" << "\n";
+	} while (true);
+}
+
+
+
+
 void IO::print_node(Node* node) {
 	this->print_config(node);
 	std::cout << "\n" <<

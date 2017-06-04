@@ -20,18 +20,27 @@ int Core::run() {
 	Game game;
 	IO io;
 
-	//test_child_configs();
+	//Node* parent = test_node_02();
+	//io.print_config(parent);
 
-	game.minimax(test_node_02(), 2, true);
+	//int max = game.minimax(parent, 6, true);
+	//std::cout << max << std::endl;
 
-	//Node* node = new Node;
-	//game.make_first_move(node);
-	//io.print_node_and_vec_score(node);
+	//Node* next_move = game.get_best_node();
+	//io.print_config(next_move);
 
 
-	//test_max_row_col();
-	//test_next_move_choice();
-	//time_next_choice();
+
+
+	//if (io.player_moves_first()) {
+	//	std::cout << "player moves first" << std::endl;
+	//}
+	//else {
+	//	std::cout << "opponent moves first" << std::endl;
+	//}
+
+	std::cout << io.time_allowed() << std::endl;
+
 
 	return 0;
 

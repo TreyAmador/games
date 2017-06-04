@@ -12,15 +12,9 @@ namespace {
 typedef Node* GameBoard;
 
 
-//struct IndexElement {
-//	int index_;
-//	int element_;
-//};
-
-
-Game::Game() {
-
-}
+Game::Game() : 
+	best_node_(new Node)
+{}
 
 
 Game::~Game() {
@@ -32,7 +26,10 @@ Game::~Game() {
 int Game::minimax(Node* node, int depth, bool maximize) {
 
 	if (depth == 0) {
-		//std::cout << "\n" << node->player_score_ << "\n\n" << std::endl;
+		return node->player_score_;
+	}
+
+	if (this->won_game(node, SYMBOL::PLAYER)) {
 		return node->player_score_;
 	}
 
@@ -40,11 +37,17 @@ int Game::minimax(Node* node, int depth, bool maximize) {
 		int best_value = -10000;
 		std::vector<Node*> nodes = this->possible_configs(node);
 		for (size_t i = 0; i < nodes.size(); ++i) {
-			int value = this->minimax(nodes[i], depth - 1, false);
-			best_value = value > best_value ? value : best_value;
-			io_.print_node_and_vec_score(nodes[i]);
+			int value = this->minimax(nodes[i], depth-1, false);
+
+			// very temporary!
+			if (value > best_value) {
+				//this->copy_config(best_node_, node);
+				this->copy_config(best_node_, nodes[i]);
+				best_value = value;
+			}
+
 		}
-		std::cout << "Maximize best val: " << best_value << "\n\n" << std::endl;
+		this->clear_nodes(nodes);
 		return best_value;
 	}
 	else {
@@ -52,14 +55,19 @@ int Game::minimax(Node* node, int depth, bool maximize) {
 		std::vector<Node*> nodes = this->possible_configs(node);
 		for (size_t i = 0; i < nodes.size(); ++i) {
 			int value = this->minimax(nodes[i], depth - 1, true);
-			best_value = value < best_value ? value : best_value;
-			io_.print_node_and_vec_score(nodes[i]);
+			
+			// very temporary!
+			if (value < best_value) {
+				//this->copy_config(best_node_, node);
+				this->copy_config(best_node_, nodes[i]);
+				best_value = value;
+			}
+
 		}
-		std::cout << "Minimize best val: " << best_value << "\n\n" << std::endl;
+		this->clear_nodes(nodes);
 		return best_value;
 	}
 }
-
 
 
 
@@ -282,6 +290,28 @@ void Game::place_symbol_from_prompt(Node* node, char symbol, int row, int col) {
 	node->config_[(row-1)*dim::SPAN+(col-1)] = symbol;
 }
 
+
+
+void Game::clear_nodes(std::vector<Node*>& nodes) {
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		if (nodes[i] != nullptr) {
+			delete nodes[i];
+			nodes[i] = nullptr;
+		}
+	}
+}
+
+
+void Game::copy_config(Node* target, Node* source) {
+	for (int i = 0; i < dim::SIZE; ++i) {
+		target->config_[i] = source->config_[i];
+	}
+}
+
+
+Node* Game::get_best_node() {
+	return this->best_node_;
+}
 
 
 // this works

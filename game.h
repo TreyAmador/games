@@ -62,6 +62,12 @@ public:
 	void place_symbol_from_prompt(Node* node, char symbol, int row, int col);
 	void make_first_move(Node* node);
 
+	void clear_nodes(std::vector<Node*>& nodes);
+
+	void copy_config(Node* target, Node* source);
+
+	Node* get_best_node();
+
 
 	// TODO don't pass by symbol, just iterate
 	//		any four in a row is a winner
@@ -87,6 +93,8 @@ private:
 	// true when you go first
 	// can be used to call alpha aka maximize methods
 	bool is_alpha_;
+
+	Node* best_node_;
 
 
 };
