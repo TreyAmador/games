@@ -2,7 +2,6 @@
 #include "node.h"
 #include "io.h"
 #include <iostream>
-#include <climits>
 
 
 namespace {
@@ -23,16 +22,21 @@ Game::~Game() {
 }
 
 
+
+// TODO pass a bool to determine if you as a player
+//		are the maximizing or minimizing player
 void Game::next_move(Node* node, int depth) {
 	
 	int best = INT_MIN;
-	int score;
+	int score = 0;
+	int alpha = INT_MIN;
+	int beta = INT_MAX;
 	int element = -1;
 
 	std::vector<int> moves = this->query_possible_moves(node);
 	for (size_t i = 0; i < moves.size(); ++i) {
 		node->config_[moves[i]] = SYMBOL::PLAYER;
-		score = this->minimize(node, depth - 1);
+		score = this->minimize(node, alpha, beta, depth - 1);
 		if (score > best) {
 			best = score;
 			element = moves[i];
@@ -43,10 +47,11 @@ void Game::next_move(Node* node, int depth) {
 }
 
 
-int Game::minimize(Node* node, int depth) {
+int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 
 	int best = INT_MAX;
 	int score;
+
 	if (this->won_game(node, SYMBOL::PLAYER)) {
 		return
 			this->calculate_config_score(node, SYMBOL::PLAYER);
@@ -63,20 +68,25 @@ int Game::minimize(Node* node, int depth) {
 	std::vector<int> moves = this->query_possible_moves(node);
 	for (size_t i = 0; i < moves.size(); ++i) {
 		node->config_[moves[i]] = SYMBOL::OPPONENT;
-		score = this->maximize(node, depth - 1);
+		score = this->maximize(node, alpha, beta, depth - 1);
 		if (score < best) {
 			best = score;
 		}
 		node->config_[moves[i]] = SYMBOL::EMPTY;
+		alpha = alpha > score ? alpha : score;
+		if (alpha > beta) {
+			break;
+		}
 	}
 	return best;
 }
 
 
-int Game::maximize(Node* node, int depth) {
+int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 
 	int best = INT_MIN;
 	int score;
+
 	if (this->won_game(node, SYMBOL::PLAYER)) {
 		return
 			this->calculate_config_score(node, SYMBOL::PLAYER);
@@ -93,11 +103,15 @@ int Game::maximize(Node* node, int depth) {
 	std::vector<int> moves = this->query_possible_moves(node);
 	for (size_t i = 0; i < moves.size(); ++i) {
 		node->config_[moves[i]] = SYMBOL::PLAYER;
-		score = this->minimize(node, depth - 1);
+		score = this->minimize(node, alpha, beta, depth - 1);
 		if (score > best) {
 			best = score;
 		}
 		node->config_[moves[i]] = SYMBOL::EMPTY;
+		beta = beta < score ? beta : score;
+		if (alpha > beta) {
+			break;
+		}
 	}
 	return best;
 }
@@ -112,7 +126,6 @@ int Game::calculate_config_score(Node* node, char symbol) {
 	}
 	return score;
 }
-
 
 
 // TODO make something smarter here!
@@ -137,20 +150,12 @@ std::vector<int> Game::query_possible_moves(Node* node) {
 }
 
 
-
 void Game::insert_unique(std::vector<int>& vec, int elem) {
 	for (size_t i = 0; i < vec.size(); ++i)
 		if (vec[i] == elem)
 			return;
 	vec.push_back(elem);
 }
-
-
-// TODO perhaps replace the player opponent args with
-//		if symbol != player
-//		else if symbol != SYMBOL::EMPTY
-//			uninterrupted = -1;
-//		then set to zero
 
 
 // this works
@@ -225,30 +230,6 @@ void Game::clear_nodes(std::vector<Node*>& nodes) {
 }
 
 
-/*
-
-Node* Game::get_best_node() {
-	return this->best_node_;
-}
-
-
-int Game::get_best_move() {
-	return this->best_move_;
-}
-
-
-Coordinate Game::get_best_coordinate() {
-
-	Coordinate coordinate;
-	coordinate.row_ = this->best_move_ / dim::SPAN;
-	coordinate.col_ = this->best_move_ % dim::SPAN;
-	return coordinate;
-
-}
-
-*/
-
-
 // this works
 bool Game::won_game(Node* node, char symbol) {
 
@@ -285,11 +266,4 @@ bool Game::won_game(Node* node, char symbol) {
 	return false;
 }
 
-
-// call after each game
-// it will reset everything
-void Game::reset_game_board() {
-	
-
-}
 

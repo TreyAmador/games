@@ -26,7 +26,7 @@ int Core::run() {
 	io.print_config(node);
 	std::cout << "score " << score << std::endl;
 
-	game.next_move(node, 5);
+	game.next_move(node, 10);
 	
 	score = game.calculate_config_score(node, SYMBOL::PLAYER);
 	io.print_config(node);

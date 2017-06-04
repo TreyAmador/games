@@ -1,7 +1,6 @@
 #include <iostream>
-#include "io.h"
 #include "node.h"
-//#include "global.h"
+#include "io.h"
 
 
 IO::IO() {
