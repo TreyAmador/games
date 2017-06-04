@@ -114,6 +114,7 @@ void IO::complete(std::vector<Node*>& nodes, char symbol) {
 	{
 		this->print_node(*iter);
 	}
+
 }
 
 

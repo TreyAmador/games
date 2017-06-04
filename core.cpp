@@ -24,12 +24,20 @@ int Core::run() {
 	Game game;
 	IO io;
 	Node* node = new Node;
-	this->set_time_allowed(game, io);
-	this->determine_move_order(game, node, io);
+	//this->set_time_allowed(game, io);
+	//this->determine_move_order(game, node, io);
 
+	node = new Node(node);
+	node->config_[3 * dim::SPAN + 3] = SYMBOL::PLAYER;
+
+	
 	while (true) {
 
-		this->opponent_turn(node,io);
+		
+		// automated
+		// uncommend below to run for real
+		//this->opponent_turn(node,io);
+		this->opponent_turn_test(node, io);
 		if (this->has_won(game, node, SYMBOL::OPPONENT))
 			return this->complete(node, SYMBOL::OPPONENT, io);
 
@@ -60,7 +68,7 @@ void Core::set_time_allowed(Game& game, IO& io) {
 
 void Core::computer_turn(Game& game, Node*& node, IO& io) {
 	node = new Node(node);
-	game.next_move(node, 50);
+	game.next_move(node);
 	io.print_node(node);
 }
 
@@ -90,6 +98,17 @@ int Core::complete(Node*& node, char symbol, IO& io) {
 }
 
 
+void Core::retroactive_moves(std::vector<Node*>& nodes, IO& io) {
+	std::vector<int> moves;
+	for (size_t i = 0; i < nodes.size()-1; ++i) {
+
+
+
+	}
+
+}
+
+
 void Core::clear_nodes(std::vector<Node*>& nodes) {
 	for (size_t i = 0; i < nodes.size(); ++i) {
 		if (nodes[i] != nullptr) {
@@ -100,12 +119,16 @@ void Core::clear_nodes(std::vector<Node*>& nodes) {
 }
 
 
-void Core::print_nodes(Node* node, IO& io) {
-	while (node != nullptr) {
-		io.print_node(node);
-		node = node->parent_;
+
+
+void Core::opponent_turn_test(Node*& node, IO& io) {
+	node = new Node(node);
+	for (int i = 0; i < dim::SIZE; ++i) {
+		if (node->config_[i] == SYMBOL::EMPTY) {
+			node->config_[i] = SYMBOL::OPPONENT;
+			break;
+		}
 	}
+	io.print_node(node);
 }
-
-
 

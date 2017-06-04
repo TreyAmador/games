@@ -5,9 +5,11 @@
 
 
 namespace {
-	//const int MAX_LEAVES = 5;
 	const int COMPUTER_WIN = 5000;
 	const int PLAYER_WIN = -5000;
+
+	// 63 should be the theoretical upper limit ? 
+	const int MAX_DEPTH = 63;
 }
 
 
@@ -25,15 +27,15 @@ Game::~Game() {
 
 
 // TODO implement minimizing or maximizing player ability
-void Game::next_move(Node* node, int max_depth) {
+void Game::next_move(Node* node) {
 
 	int best_score = 0;
 	int best_element = -1;
 	int depth = 1;
 
-	//this->revise_strategy(node);
+	this->revise_strategy(node);
 
-	while (depth < max_depth) {
+	while (depth < MAX_DEPTH) {
 		int element = this->minimax(node, depth);
 		int score = this->calculate_config_score(node, SYMBOL::PLAYER);
 		if (score > best_score) {
@@ -60,9 +62,9 @@ void Game::next_move(Node* node, int max_depth) {
 //			player heuristic or opponent heuristic
 //
 //
-//		iterative deepening
-//			implement as a loop which increments depth of iteration
-//			where you compare heuristic between iterations ...
+//		update heuristic!
+//			it's crap!
+//			perhaps calculate heuristic in same function searching moves
 //
 //
 
@@ -105,8 +107,9 @@ int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 	if (depth == 0)
 		return this->calculate_config_score(node, SYMBOL::PLAYER);
 
+	bool unpruned = true;
 	std::vector<int> moves = this->query_possible_moves(node);
-	for (size_t i = 0; i < moves.size(); ++i) {
+	for (size_t i = 0; i < moves.size() && unpruned; ++i) {
 
 		node->config_[moves[i]] = SYMBOL::OPPONENT;
 		score = this->maximize(node, alpha, beta, depth - 1);
@@ -116,7 +119,7 @@ int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 
 		alpha = alpha > score ? alpha : score;
 		if (alpha > beta)
-			break;
+			unpruned = false;
 	}
 	return best;
 }
@@ -134,8 +137,9 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 	if (depth == 0)
 		return this->calculate_config_score(node, SYMBOL::PLAYER);
 
+	bool unpruned = true;
 	std::vector<int> moves = this->query_possible_moves(node);
-	for (size_t i = 0; i < moves.size(); ++i) {
+	for (size_t i = 0; i < moves.size() && unpruned; ++i) {
 		
 		node->config_[moves[i]] = SYMBOL::PLAYER;
 		score = this->minimize(node, alpha, beta, depth - 1);
@@ -145,7 +149,7 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 
 		beta = beta < score ? beta : score;
 		if (alpha > beta)
-			break;
+			unpruned = false;
 	}
 	return best;
 }
@@ -160,6 +164,34 @@ int Game::calculate_config_score(Node* node, char symbol) {
 	}
 	return score;
 }
+
+
+// probably break into two methods
+// maximize them cache hits, baby
+int Game::calculate_config_score(Node* node, char symbol, int) {
+
+	for (int r = 0; r < dim::SPAN; ++r) {
+		int row_score = 0;
+		for (int c = 0; c < dim::SPAN; ++c) {
+			int i = r*dim::SPAN+c;
+
+
+
+		}
+	}
+
+	for (int c = 0; c < dim::SPAN; ++c) {
+		int col_score = 0;
+		for (int r = 0; r < dim::SPAN; ++r) {
+			int i = r*dim::SPAN+c;
+
+
+
+		}
+	}
+
+}
+
 
 
 // TODO make something smarter here!
@@ -256,6 +288,11 @@ void Game::place_symbol_by_indeces(Node* node, char symbol, int row, int col) {
 
 bool Game::get_offensive_strategy() {
 	return this->offensive_strategy_;
+}
+
+
+void Game::set_max_depth(int depth) {
+	
 }
 
 
