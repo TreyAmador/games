@@ -39,10 +39,71 @@ void test_child_node();
 void test_next_move_choice(Game& game, IO& io, Node* node);
 void time_next_choice();
 void test_child_configs();
+void test_query_possible_moves();
 
 
 
 
+
+
+void test_query_possible_moves() {
+
+	Game game;
+	IO io;
+
+	Node* node = new Node;
+
+	node->config_[27] = SYMBOL::PLAYER;
+	node->config_[28] = SYMBOL::OPPONENT;
+	node->config_[35] = SYMBOL::PLAYER;
+	node->config_[43] = SYMBOL::OPPONENT;
+	node->config_[19] = SYMBOL::PLAYER;
+	node->config_[11] = SYMBOL::OPPONENT;
+	node->config_[36] = SYMBOL::PLAYER;
+
+	game.calculate_config_score(node);
+	io.print_config(node);
+	std::cout << std::endl;
+
+	std::vector<int> moves = game.query_possible_moves(node);
+
+	std::cout << "\n" << std::endl;
+
+	for (size_t i = 0; i < moves.size(); ++i) {
+		std::cout << 
+			"row: " << static_cast<char>(moves[i]/dim::SPAN+'A') << "  " << 
+			"col: " << (moves[i]%dim::SPAN)+1 << "\n";
+	}
+	std::cout << std::endl;
+
+}
+
+
+
+
+void test_calc_config() {
+	
+	Game game;
+	IO io;
+
+	Node* node = new Node;
+
+	node->config_[27] = SYMBOL::PLAYER;
+	node->config_[28] = SYMBOL::OPPONENT;
+	node->config_[35] = SYMBOL::PLAYER;
+	node->config_[43] = SYMBOL::OPPONENT;
+	node->config_[19] = SYMBOL::PLAYER;
+	node->config_[11] = SYMBOL::OPPONENT;
+	node->config_[36] = SYMBOL::PLAYER;
+
+	game.calculate_config_score(node);
+
+	io.print_config(node);
+
+	std::cout << "Player score   " << node->player_score_ << std::endl;
+	std::cout << "Opponent score " << node->opponent_score_ << std::endl;
+
+}
 
 
 
@@ -54,7 +115,7 @@ void test_child_configs() {
 	Node* node = test_node_02();
 	io.print_node_and_vec_score(node);
 
-	std::vector<Node*> offspring = game.possible_configs(node);
+	std::vector<Node*> offspring = game.possible_configs(node,SYMBOL::PLAYER);
 	for (size_t i = 0; i < offspring.size(); ++i) {
 		io.print_config(offspring[i]);
 	}
@@ -91,7 +152,7 @@ void test_next_move_choice(Game& game, IO& io, Node* node) {
 	//Node* node = test_node_02();
 	//io.print_node_and_vec_score(node);
 
-	std::vector<int> coords = game.query_moves_alpha(node);
+	std::vector<int> coords = game.query_moves_alpha(node,SYMBOL::PLAYER);
 
 	for (size_t i = 0; i < coords.size(); ++i) {
 		int row = coords[i] / dim::SPAN;

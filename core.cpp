@@ -23,13 +23,15 @@ int Core::run() {
 	//Node* parent = test_node_02();
 	//io.print_config(parent);
 
-	//int max = game.minimax(parent, 6, true);
+	//int max = game.minimax(parent, 1, true);
 	//std::cout << max << std::endl;
 
 	//Node* next_move = game.get_best_node();
 	//io.print_config(next_move);
 
+	//test_calc_config();
 
+	test_query_possible_moves();
 
 
 	//if (io.player_moves_first()) {
@@ -39,7 +41,7 @@ int Core::run() {
 	//	std::cout << "opponent moves first" << std::endl;
 	//}
 
-	std::cout << io.time_allowed() << std::endl;
+	//std::cout << io.time_allowed() << std::endl;
 
 
 	return 0;

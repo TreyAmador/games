@@ -23,6 +23,8 @@ Game::~Game() {
 
 
 
+
+
 int Game::minimax(Node* node, int depth, bool maximize) {
 
 	if (depth == 0) {
@@ -32,37 +34,47 @@ int Game::minimax(Node* node, int depth, bool maximize) {
 	if (this->won_game(node, SYMBOL::PLAYER)) {
 		return node->player_score_;
 	}
+	if (this->won_game(node, SYMBOL::OPPONENT)) {
+		return node->opponent_score_;
+	}
 
 	if (maximize) {
 		int best_value = -10000;
-		std::vector<Node*> nodes = this->possible_configs(node);
-		for (size_t i = 0; i < nodes.size(); ++i) {
-			int value = this->minimax(nodes[i], depth-1, false);
+		//std::vector<Node*> nodes = this->possible_configs(node, SYMBOL::PLAYER);
+		std::vector<int> moves = this->query_moves_alpha(node, SYMBOL::PLAYER);
+		
+		for (size_t i = 0; i < moves.size(); ++i) {
 
+			node->config_[moves[i]] = SYMBOL::PLAYER;
+			// TODO calculate the player scores!
+			this->calculate_config_score(node);
+
+
+
+
+
+			int value = this->minimax(node, depth - 1, false);
 			// very temporary!
 			if (value > best_value) {
-				//this->copy_config(best_node_, node);
-				this->copy_config(best_node_, nodes[i]);
+				
+				
 				best_value = value;
 			}
-
 		}
-		this->clear_nodes(nodes);
+		
 		return best_value;
 	}
 	else {
 		int best_value = 10000;
-		std::vector<Node*> nodes = this->possible_configs(node);
+		std::vector<Node*> nodes = this->possible_configs(node, SYMBOL::OPPONENT);
 		for (size_t i = 0; i < nodes.size(); ++i) {
 			int value = this->minimax(nodes[i], depth - 1, true);
-			
 			// very temporary!
 			if (value < best_value) {
 				//this->copy_config(best_node_, node);
 				this->copy_config(best_node_, nodes[i]);
 				best_value = value;
 			}
-
 		}
 		this->clear_nodes(nodes);
 		return best_value;
@@ -71,6 +83,60 @@ int Game::minimax(Node* node, int depth, bool maximize) {
 
 
 
+
+
+
+
+
+/*
+
+int Game::minimax(Node* node, int depth, bool maximize) {
+
+	if (depth == 0) {
+		return node->player_score_;
+	}
+
+	if (this->won_game(node, SYMBOL::PLAYER)) {
+		return node->player_score_;
+	}
+	if (this->won_game(node, SYMBOL::OPPONENT)) {
+		return node->opponent_score_;
+	}
+
+	if (maximize) {
+		int best_value = -10000;
+		std::vector<Node*> nodes = this->possible_configs(node,SYMBOL::PLAYER);
+		for (size_t i = 0; i < nodes.size(); ++i) {
+			int value = this->minimax(nodes[i], depth-1, false);
+			// very temporary!
+			if (value > best_value) {
+				//this->copy_config(best_node_, node);
+				this->copy_config(best_node_, nodes[i]);
+				best_value = value;
+			}
+		}
+		this->clear_nodes(nodes);
+		return best_value;
+	}
+	else {
+		int best_value = 10000;
+		std::vector<Node*> nodes = this->possible_configs(node,SYMBOL::OPPONENT);
+		for (size_t i = 0; i < nodes.size(); ++i) {
+			int value = this->minimax(nodes[i], depth - 1, true);
+			// very temporary!
+			if (value < best_value) {
+				//this->copy_config(best_node_, node);
+				this->copy_config(best_node_, nodes[i]);
+				best_value = value;
+			}
+		}
+		this->clear_nodes(nodes);
+		return best_value;
+	}
+}
+
+*/
+
 // TODO implement this where you go across row and column
 //		to get next good value
 //		perhaps check score in increments of four,
@@ -78,12 +144,12 @@ int Game::minimax(Node* node, int depth, bool maximize) {
 //			relative to that four increment value
 //		make this more efficient!!!!
 
-std::vector<Node*> Game::possible_configs(Node* root) {
+std::vector<Node*> Game::possible_configs(Node* root, char symbol) {
 	std::vector<Node*> nodes;
-	std::vector<int> indices = this->query_moves_alpha(root);
+	std::vector<int> indices = this->query_moves_alpha(root,symbol);
 	for (size_t i = 0; i < indices.size(); ++i) {
 		nodes.push_back(this->create_child_node(root,
-			indices[i]/dim::SPAN,indices[i]%dim::SPAN,SYMBOL::PLAYER));
+			indices[i]/dim::SPAN,indices[i]%dim::SPAN,symbol));
 	}
 	return nodes;
 }
@@ -110,23 +176,74 @@ std::vector<Node*> Game::possible_configs(Node* root) {
 //		test while vector.size <= 5 ?
 //
 //
-std::vector<int> Game::query_moves_alpha(Node* node) {
+std::vector<int> Game::query_moves_alpha(Node* node, char symbol) {
 
 	std::vector<int> indices;
 	int row_idx = -1, col_idx = -1;
-	int fst_row = this->greatest_index(node->row_player_, row_idx),
-		fst_col = this->greatest_index(node->col_player_, col_idx);
-	int sec_row = this->greatest_index(node->row_player_, row_idx),
-		sec_col = this->greatest_index(node->col_player_, col_idx);
+
+
+	// very very temporary!
+	if (symbol == SYMBOL::PLAYER) {
+		int fst_row = this->greatest_index(node->row_player_, row_idx),
+			fst_col = this->greatest_index(node->col_player_, col_idx);
+		int sec_row = this->greatest_index(node->row_player_, row_idx),
+			sec_col = this->greatest_index(node->col_player_, col_idx);
+		this->create_row_coordinates(node, indices, fst_row);
+		this->create_row_coordinates(node, indices, sec_row);
+		this->create_col_coordinates(node, indices, fst_col);
+		this->create_col_coordinates(node, indices, sec_col);
+	}
+	else if (symbol == SYMBOL::OPPONENT) {
+		int fst_row = this->greatest_index(node->row_opponent_, row_idx),
+			fst_col = this->greatest_index(node->col_opponent_, col_idx);
+		int sec_row = this->greatest_index(node->row_opponent_, row_idx),
+			sec_col = this->greatest_index(node->col_opponent_, col_idx);
+		this->create_row_coordinates(node, indices, fst_row);
+		this->create_row_coordinates(node, indices, sec_row);
+		this->create_col_coordinates(node, indices, fst_col);
+		this->create_col_coordinates(node, indices, sec_col);
+	}
 	
-	this->create_row_coordinates(node, indices, fst_row);
-	this->create_row_coordinates(node, indices, sec_row);
-	this->create_col_coordinates(node, indices, fst_col);
-	this->create_col_coordinates(node, indices, sec_col);
 
 	return indices;
 	
 }
+
+
+int Game::calculate_config_score(Node* node) {
+	node->player_score_ = node->opponent_score_ = 0;
+	for (int i = 0; i < dim::SPAN; ++i) {
+		node->player_score_ += this->update_min_max_row(node, i, SYMBOL::PLAYER);
+		node->player_score_ += this->update_min_max_col(node, i, SYMBOL::PLAYER);
+		node->opponent_score_ += this->update_min_max_row(node, i, SYMBOL::OPPONENT);
+		node->opponent_score_ += this->update_min_max_col(node, i, SYMBOL::OPPONENT);
+	}
+	return 0;
+}
+
+
+
+// TODO make something smarter here!
+std::vector<int> Game::query_possible_moves(Node* node) {
+	std::vector<int> moves;
+	for (int r = 0; r < dim::SPAN; ++r) {
+		for (int c = 0; c < dim::SPAN; ++c) {
+			int index = r*dim::SPAN+c;
+			if (node->config_[index] != SYMBOL::EMPTY) {
+				if (r != 0 && node->config_[index - 1] == SYMBOL::EMPTY)
+					this->insert_unique(moves, index - 1);
+				if (r != dim::SPAN && node->config_[index + 1] == SYMBOL::EMPTY)
+					this->insert_unique(moves, index + 1);
+				if (c != 0 && node->config_[index - dim::SPAN] == SYMBOL::EMPTY)
+					this->insert_unique(moves, index - dim::SPAN);
+				if (c != dim::SPAN && node->config_[index + dim::SPAN] == SYMBOL::EMPTY)
+					this->insert_unique(moves, index + dim::SPAN);
+			}
+		}
+	}
+	return moves;
+}
+
 
 
 
@@ -213,7 +330,6 @@ void Game::calculate_vector_scores(Node* node, int row, int col) {
 
 
 // pass player and opponent scores by reference
-// return player score, not opponent score
 void Game::calculate_score_from_vectors(Node* node, int& player, int& opponent) {
 	player = opponent = 0;
 	for (int i = 0; i < dim::SPAN; ++i) {

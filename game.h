@@ -28,13 +28,21 @@ public:
 	//		and calculate utility function
 	int minimax(Node* node, int depth, bool maximize);
 
+	//int minimize(Node* node, int depth);
+	//int maximize(Node* node, int depth);
 
 	
 	// pass in node, get all adjacent nodes
-	std::vector<Node*> possible_configs(Node* root);
+	std::vector<Node*> possible_configs(Node* root, char symbol);
+
+	int calculate_config_score(Node* node);
+
+
+	std::vector<int> query_possible_moves(Node* node);
+
 
 	// should probably pass in SYMBOL::SYMBOL ? 
-	std::vector<int> query_moves_alpha(Node* node);
+	std::vector<int> query_moves_alpha(Node* node, char symbol);
 	
 	void insert_unique(std::vector<int>& vec, int elem);
 
@@ -68,6 +76,8 @@ public:
 
 	Node* get_best_node();
 
+	//void find_taken_move(Node*);
+
 
 	// TODO don't pass by symbol, just iterate
 	//		any four in a row is a winner
@@ -95,6 +105,8 @@ private:
 	bool is_alpha_;
 
 	Node* best_node_;
+
+	Coordinate best_coordinate_;
 
 
 };
