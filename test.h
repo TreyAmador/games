@@ -9,6 +9,9 @@ int test_add_elem(Node* node, int row, int col, char symbol);
 void test_heuristic_diff();
 void test_revise_strategy();
 void test_node_ptr();
+void test_exponent();
+void test_calculate_config_score();
+
 
 
 Node* test_node_01() {
@@ -73,6 +76,48 @@ Node* test_node_04() {
 	return node;
 
 }
+
+
+
+void test_calculate_config_score() {
+
+	Game game;
+	IO io;
+
+	Node* node = new Node;
+	test_add_elem(node, 3, 3, SYMBOL::PLAYER);
+	test_add_elem(node, 3, 4, SYMBOL::PLAYER);
+	test_add_elem(node, 3, 5, SYMBOL::PLAYER);
+
+
+	int score = game.calculate_config_score(node, SYMBOL::PLAYER);
+	io.print_node(node);
+	std::cout << "\n" << "score " << score << "\n\n" << std::endl;
+
+
+
+}
+
+
+void test_exponent() {
+
+	Game game;
+
+	int a = 4, b = 5;
+	int c = 3, d = 6;
+	int e = 4, f = 0;
+	int g = -5, h = 3;
+	int i = 4, j = -3;
+
+	std::cout << game.pow(a,b) << std::endl;
+	std::cout << game.pow(c,d) << std::endl;
+	std::cout << game.pow(e,f) << std::endl;
+	std::cout << game.pow(g,h) << std::endl;
+	std::cout << game.pow(i,j) << std::endl;
+
+
+}
+
 
 
 

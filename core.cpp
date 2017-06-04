@@ -18,17 +18,21 @@ Core::~Core() {
 
 int Core::run() {
 
-	//test_node_ptr();
 
-	
+	//test_calculate_config_score();
+	//if (true) return 0;
+
+
 	Game game;
 	IO io;
 	Node* node = new Node;
-	//this->set_time_allowed(game, io);
-	//this->determine_move_order(game, node, io);
 
-	node = new Node(node);
-	node->config_[3 * dim::SPAN + 3] = SYMBOL::PLAYER;
+	// re-comment this in
+	this->set_time_allowed(game, io);
+	this->determine_move_order(game, node, io);
+
+	//node = new Node(node);
+	//node->config_[3 * dim::SPAN + 3] = SYMBOL::PLAYER;
 
 	
 	while (true) {
@@ -36,8 +40,11 @@ int Core::run() {
 		
 		// automated
 		// uncommend below to run for real
-		//this->opponent_turn(node,io);
-		this->opponent_turn_test(node, io);
+		this->opponent_turn(node,io);
+
+		// uncomment this to run crappy test
+		//this->opponent_turn_test(node, io);
+		
 		if (this->has_won(game, node, SYMBOL::OPPONENT))
 			return this->complete(node, SYMBOL::OPPONENT, io);
 

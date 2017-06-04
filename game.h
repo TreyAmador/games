@@ -25,7 +25,7 @@ public:
 	
 	std::vector<int> query_possible_moves(Node* node);
 	int calculate_config_score(Node* node, char symbol);
-	int calculate_config_score(Node* node, char symbol, int);
+	//int calculate_config_score(Node* node, char symbol, int);
 	
 	int update_min_max_row(Node* node, int row, char player);
 	int update_min_max_col(Node* node, int col, char player);
@@ -43,8 +43,7 @@ public:
 	bool get_offensive_strategy();
 	void revise_strategy(Node* node);
 
-
-
+	int pow(int base, int exp);
 	void clear_nodes(std::vector<Node*>& nodes);
 	bool won_game(Node* node, char symbol);
 
