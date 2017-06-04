@@ -18,11 +18,6 @@ Core::~Core() {
 
 int Core::run() {
 
-
-	//test_calculate_config_score();
-	//if (true) return 0;
-
-
 	Game game;
 	IO io;
 	Node* node = new Node;
@@ -37,14 +32,13 @@ int Core::run() {
 	
 	while (true) {
 
-		
 		// automated
 		// uncommend below to run for real
 		this->opponent_turn(node,io);
 
 		// uncomment this to run crappy test
 		//this->opponent_turn_test(node, io);
-		
+
 		if (this->has_won(game, node, SYMBOL::OPPONENT))
 			return this->complete(node, SYMBOL::OPPONENT, io);
 
@@ -63,8 +57,12 @@ void Core::determine_move_order(Game& game, Node*& node, IO& io) {
 	if (io.computer_moves_first()) {
 		node = new Node(node);
 		game.make_first_move(node);
-		io.print_node(node);
+		game.set_strategy_offensive();
 	}
+	else {
+		game.set_strategy_defensive();
+	}
+	io.print_node(node);
 }
 
 

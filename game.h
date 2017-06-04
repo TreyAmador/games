@@ -24,9 +24,14 @@ public:
 	int maximize(Node* node, int& alpha, int& beta, int depth);
 	
 	std::vector<int> query_possible_moves(Node* node);
-	int calculate_config_score(Node* node, char symbol);
-	//int calculate_config_score(Node* node, char symbol, int);
 	
+	int calculate_config_score(Node* node, char player);
+	int calculate_config_rows(Node* node, char player);
+	int calcualte_config_cols(Node* node, char player);
+
+	int utility_offensive(Node* node);
+	int utility_defensive(Node* node);
+
 	int update_min_max_row(Node* node, int row, char player);
 	int update_min_max_col(Node* node, int col, char player);
 	

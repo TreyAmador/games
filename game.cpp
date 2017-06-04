@@ -10,7 +10,7 @@ namespace {
 	const int PLAYER_WIN = -5000;
 
 	// 63 should be the theoretical upper limit ? 
-	const int MAX_DEPTH = 63;
+	const int MAX_DEPTH = 15;
 }
 
 
@@ -34,7 +34,12 @@ void Game::next_move(Node* node) {
 	int best_element = -1;
 	int depth = 1;
 
-	this->revise_strategy(node);
+	//this->revise_strategy(node);
+
+	std::cout << 
+		"strategy, 1 offensive, 0 defensive " << 
+		this->offensive_strategy_ << std::endl;
+
 
 	while (depth < MAX_DEPTH) {
 		int element = this->minimax(node, depth);
@@ -107,7 +112,12 @@ int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 		return PLAYER_WIN;
 	if (depth == 0)
 		return
-			this->calculate_config_score(node, SYMBOL::PLAYER);
+			this->offensive_strategy_ ? 
+			this->utility_offensive(node) : 
+			this->utility_defensive(node);
+		//return
+		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
+		//	(this->calculate_config_score(node, SYMBOL::OPPONENT) + 1);
 
 	bool unpruned = true;
 	std::vector<int> moves = this->query_possible_moves(node);
@@ -137,8 +147,12 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 	if (this->won_game(node, SYMBOL::OPPONENT))
 		return PLAYER_WIN;
 	if (depth == 0)
-		return
-			this->calculate_config_score(node, SYMBOL::PLAYER);
+		return this->offensive_strategy_ ?
+			this->utility_offensive(node) :
+			this->utility_defensive(node);
+		//return
+		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
+		//	(this->calculate_config_score(node, SYMBOL::OPPONENT)+1);
 
 	bool unpruned = true;
 	std::vector<int> moves = this->query_possible_moves(node);
@@ -158,26 +172,21 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 }
 
 
-/*
-int Game::calculate_config_score(Node* node, char symbol) {
-	int score = 0;
-	for (int i = 0; i < dim::SPAN; ++i) {
-		score += this->update_min_max_row(node, i, symbol);
-		score += this->update_min_max_col(node, i, symbol);
-	}
-	return score;
-}
-*/
-
 int Game::calculate_config_score(Node* node, char player) {
+	return 
+		this->calculate_config_rows(node, player) + 
+		this->calcualte_config_cols(node, player);
+}
 
+
+int Game::calculate_config_rows(Node* node, char player) {
 	int row_score = 0;
 	for (int row = 0; row < dim::SPAN; ++row) {
 		int r = row*dim::SPAN;
 		for (int c = 0; c <= dim::MAX_ADJ; ++c) {
 			int uninterrupted = 0;
 			for (int i = 0; i < dim::MAX_ADJ && uninterrupted != -1; ++i) {
-				char symbol = node->config_[r + c + i];
+				char symbol = node->config_[r+c+i];
 				if (symbol == player)
 					++uninterrupted;
 				else if (symbol != SYMBOL::EMPTY)
@@ -187,13 +196,17 @@ int Game::calculate_config_score(Node* node, char player) {
 				row_score += this->pow(uninterrupted, uninterrupted);
 		}
 	}
+	return row_score;
+}
 
+
+int Game::calcualte_config_cols(Node* node, char player) {
 	int column_score = 0;
 	for (int c = 0; c < dim::SPAN; ++c) {
 		for (int r = 0; r <= dim::MAX_ADJ; ++r) {
 			int uninterrupted = 0;
 			for (int i = 0; i < dim::MAX_ADJ && uninterrupted != -1; ++i) {
-				char symbol = node->config_[c + dim::SPAN*(r + i)];
+				char symbol = node->config_[c+dim::SPAN*(r+i)];
 				if (symbol == player)
 					++uninterrupted;
 				else if (symbol != SYMBOL::EMPTY)
@@ -203,9 +216,20 @@ int Game::calculate_config_score(Node* node, char player) {
 				column_score += this->pow(uninterrupted, uninterrupted);
 		}
 	}
+	return column_score;
+}
 
-	return row_score + column_score;
 
+int Game::utility_offensive(Node* node) {
+	return
+		this->calculate_config_score(node, SYMBOL::PLAYER) -
+		this->calculate_config_score(node, SYMBOL::OPPONENT);
+}
+
+
+int Game::utility_defensive(Node* node) {
+	return 
+		(-this->calculate_config_score(node,SYMBOL::OPPONENT));
 }
 
 
