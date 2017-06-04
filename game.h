@@ -21,52 +21,23 @@ public:
 	Game();
 	~Game();
 
-	
 	// seems to be working...
 	// TODO need to sort through the code to see where
 	//		scores should be attributed to player vs opponent
 	//		and calculate utility function
-	int minimax(Node* node, int depth, bool maximize);
+	//int minimax(Node* node, int depth, bool maximize);
+
+	void next_move(Node* node, int depth);
 	int minimize(Node* node, int depth);
 	int maximize(Node* node, int depth);
 
-
-	//int make_move(Node* node);
-	//int minimize(Node* node, int depth);
-	//int maximize(Node* node, int depth);
-
 	
-	// pass in node, get all adjacent nodes
-	std::vector<Node*> possible_configs(Node* root, char symbol);
-
-	int calculate_config_score(Node* node);
 	int calculate_config_score(Node* node, char symbol);
 
 
 	std::vector<int> query_possible_moves(Node* node);
 
-
-	// should probably pass in SYMBOL::SYMBOL ? 
-	std::vector<int> query_moves_alpha(Node* node, char symbol);
-	
 	void insert_unique(std::vector<int>& vec, int elem);
-
-	void create_row_coordinates(
-		Node* node, std::vector<int>& coords, int row);
-	void create_col_coordinates(
-		Node* ndoe, std::vector<int>& coords, int col);
-
-	Node* create_child_node(Node* parent, int row, int col, char symbol);
-	void calculate_vector_scores(Node* node, int row, int col);
-
-
-
-	int greatest_index(int* span, int& bypass);
-
-
-	// calc player from vectors
-	void calculate_score_from_vectors(
-		Node* node, int& player, int& opponent);
 
 	int update_min_max_row(Node* node, int row, char player);
 	int update_min_max_col(Node* node, int col, char player);
@@ -76,8 +47,6 @@ public:
 	void make_first_move(Node* node);
 
 	void clear_nodes(std::vector<Node*>& nodes);
-
-	void copy_config(Node* target, Node* source);
 
 	Node* get_best_node();
 

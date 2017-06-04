@@ -1,3 +1,70 @@
+#include "game.h"
+#include "node.h"
+#include "io.h"
+
+
+void test_heuristic_diff();
+
+
+
+
+Node* test_node_01() {
+
+	Node* node = new Node;
+
+	node->config_[27] = SYMBOL::PLAYER;
+	node->config_[28] = SYMBOL::OPPONENT;
+	node->config_[19] = SYMBOL::PLAYER;
+	node->config_[11] = SYMBOL::OPPONENT;
+
+	return node;
+
+}
+
+
+Node* test_node_02() {
+
+	Node* node = new Node;
+
+	node->config_[27] = SYMBOL::PLAYER;
+	node->config_[28] = SYMBOL::OPPONENT;
+	node->config_[35] = SYMBOL::PLAYER;
+	node->config_[43] = SYMBOL::OPPONENT;
+	node->config_[19] = SYMBOL::PLAYER;
+	node->config_[11] = SYMBOL::OPPONENT;
+	node->config_[36] = SYMBOL::PLAYER;
+
+	return node;
+
+}
+
+
+
+
+void test_heuristic_diff() {
+
+
+	Game game;
+	IO io;
+
+	Node* node = test_node_01();
+	
+	node->config_[35] = SYMBOL::PLAYER;
+	io.print_config(node);
+	std::cout << 
+		game.calculate_config_score(node, SYMBOL::PLAYER) << "\n" << std::endl;
+	node->config_[35] = SYMBOL::EMPTY;
+
+	node->config_[36] = SYMBOL::PLAYER;
+	io.print_config(node);
+	std::cout << 
+		game.calculate_config_score(node, SYMBOL::PLAYER) << "\n" << std::endl;
+	node->config_[36] = SYMBOL::EMPTY;
+
+
+}
+
+
 
 
 
