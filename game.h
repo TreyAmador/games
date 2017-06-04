@@ -18,8 +18,8 @@ public:
 	~Game();
 
 	void next_move(Node* node, int max_depth);
-	int move_iteration(Node* node, int depth);
-
+	
+	int minimax(Node* node, int depth);
 	int minimize(Node* node, int& alpha, int& beta, int depth);
 	int maximize(Node* node, int& alpha, int& beta, int depth);
 	
@@ -33,14 +33,22 @@ public:
 	void insert_unique(std::vector<int>& vec, int elem);
 	
 	void place_symbol_by_indeces(Node* node, char symbol, int row, int col);
-	void place_symbol_from_prompt(Node* node, char symbol, int row, int col);
+	//void place_symbol_from_prompt(Node* node, char symbol, int row, int col);
+
+	bool get_offensive_strategy();
+
+	void set_time_allowed(int time_allowed);
+	void set_strategy_offensive();
+	void set_strategy_defensive();
+	void revise_strategy(Node* node);
 
 	void clear_nodes(std::vector<Node*>& nodes);
 	bool won_game(Node* node, char symbol);
 
 
 private:
-	
+	int time_allowed_;
+	bool offensive_strategy_;
 
 
 };

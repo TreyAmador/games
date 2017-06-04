@@ -101,3 +101,19 @@ void IO::print_node(Node* node) {
 	std::cout << "\n" << std::endl;
 }
 
+
+void IO::complete(std::vector<Node*>& nodes, char symbol) {
+
+	if (symbol == SYMBOL::PLAYER)
+		std::cout << "The computer has won." << "\n\n" << std::endl;
+	else
+		std::cout << "Congratulations, you have won." << "\n\n" << std::endl;
+
+	for (std::vector<Node*>::iterator iter = nodes.begin(); 
+		iter != nodes.end(); ++iter) 
+	{
+		this->print_node(*iter);
+	}
+}
+
+

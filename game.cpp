@@ -5,7 +5,9 @@
 
 
 namespace {
-	const int MAX_LEAVES = 5;
+	//const int MAX_LEAVES = 5;
+	const int COMPUTER_WIN = 5000;
+	const int PLAYER_WIN = -5000;
 }
 
 
@@ -27,10 +29,12 @@ void Game::next_move(Node* node, int max_depth) {
 
 	int best_score = 0;
 	int best_element = -1;
-	int depth = 0;
+	int depth = 1;
+
+	//this->revise_strategy(node);
 
 	while (depth < max_depth) {
-		int element = this->move_iteration(node, depth);
+		int element = this->minimax(node, depth);
 		int score = this->calculate_config_score(node, SYMBOL::PLAYER);
 		if (score > best_score) {
 			best_score = score;
@@ -62,7 +66,7 @@ void Game::next_move(Node* node, int max_depth) {
 //
 //
 
-int Game::move_iteration(Node* node, int depth) {
+int Game::minimax(Node* node, int depth) {
 	
 	int best = INT_MIN;
 	int score = 0;
@@ -85,15 +89,19 @@ int Game::move_iteration(Node* node, int depth) {
 }
 
 
+// NOTE it is questionable if there is some better value to return
+//		upon a victory / defeat ...  what would work best?
+//		this should be revised, a computer win was this before:
+//			return this->calculate_config_score(node, SYMBOL::PLAYER);
 int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 
 	int best = INT_MAX;
 	int score;
 
 	if (this->won_game(node, SYMBOL::PLAYER))
-		return this->calculate_config_score(node, SYMBOL::PLAYER);
+		return COMPUTER_WIN;
 	if (this->won_game(node, SYMBOL::OPPONENT))
-		return this->calculate_config_score(node, SYMBOL::PLAYER);
+		return PLAYER_WIN;
 	if (depth == 0)
 		return this->calculate_config_score(node, SYMBOL::PLAYER);
 
@@ -120,9 +128,9 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 	int score;
 
 	if (this->won_game(node, SYMBOL::PLAYER))
-		return this->calculate_config_score(node, SYMBOL::PLAYER);
+		return COMPUTER_WIN;
 	if (this->won_game(node, SYMBOL::OPPONENT))
-		return this->calculate_config_score(node, SYMBOL::PLAYER);
+		return PLAYER_WIN;
 	if (depth == 0)
 		return this->calculate_config_score(node, SYMBOL::PLAYER);
 
@@ -228,7 +236,8 @@ int Game::update_min_max_col(Node* node, int col, char player) {
 //			col = rand() % 2 == 0 ? 3 : 4;
 void Game::make_first_move(Node* node) {
 	int row = 3, col = 3;
-	this->place_symbol_by_indeces(node, SYMBOL::PLAYER, row, col);
+	//this->place_symbol_by_indeces(node, SYMBOL::PLAYER, row, col);
+	node->config_[row*dim::SPAN+col] = SYMBOL::PLAYER;
 }
 
 
@@ -240,8 +249,37 @@ void Game::place_symbol_by_indeces(Node* node, char symbol, int row, int col) {
 
 
 // does this really need to be included..?
-void Game::place_symbol_from_prompt(Node* node, char symbol, int row, int col) {
-	node->config_[(row-1)*dim::SPAN+(col-1)] = symbol;
+//void Game::place_symbol_from_prompt(Node* node, char symbol, int row, int col) {
+//	node->config_[(row-1)*dim::SPAN+(col-1)] = symbol;
+//}
+
+
+bool Game::get_offensive_strategy() {
+	return this->offensive_strategy_;
+}
+
+
+void Game::set_time_allowed(int time_allowed) {
+	this->time_allowed_ = time_allowed;
+}
+
+
+void Game::set_strategy_offensive() {
+	this->offensive_strategy_ = true;
+}
+
+
+void Game::set_strategy_defensive() {
+	this->offensive_strategy_ = false;
+}
+
+
+void Game::revise_strategy(Node* node) {
+	
+	int player_score = this->calculate_config_score(node, SYMBOL::PLAYER);
+	int opponent_score = this->calculate_config_score(node, SYMBOL::OPPONENT);
+	this->offensive_strategy_ = player_score >= opponent_score;
+
 }
 
 
@@ -290,5 +328,4 @@ bool Game::won_game(Node* node, char symbol) {
 
 	return false;
 }
-
 

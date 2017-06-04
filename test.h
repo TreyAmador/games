@@ -1,11 +1,14 @@
+#ifndef TEST_H_
+#define TEST_H_
 #include "game.h"
 #include "node.h"
 #include "io.h"
 
 
+int test_add_elem(Node* node, int row, int col, char symbol);
 void test_heuristic_diff();
-
-
+void test_revise_strategy();
+void test_node_ptr();
 
 
 Node* test_node_01() {
@@ -34,10 +37,112 @@ Node* test_node_02() {
 	node->config_[11] = SYMBOL::OPPONENT;
 	node->config_[36] = SYMBOL::PLAYER;
 
+
 	return node;
 
 }
 
+
+Node* test_node_03() {
+
+	Node* node = new Node;
+	
+	test_add_elem(node, 3, 3, SYMBOL::PLAYER);
+	test_add_elem(node, 3, 4, SYMBOL::OPPONENT);
+	test_add_elem(node, 4, 3, SYMBOL::PLAYER);
+	test_add_elem(node, 5, 3, SYMBOL::OPPONENT);
+	test_add_elem(node, 2, 3, SYMBOL::PLAYER);
+	test_add_elem(node, 3, 5, SYMBOL::OPPONENT);
+
+	return node;
+
+}
+
+
+Node* test_node_04() {
+
+	Node* node = new Node;
+
+	test_add_elem(node, 3, 3, SYMBOL::PLAYER);
+	test_add_elem(node, 4, 3, SYMBOL::OPPONENT);
+	test_add_elem(node, 3, 4, SYMBOL::PLAYER);
+	test_add_elem(node, 3, 5, SYMBOL::OPPONENT);
+	test_add_elem(node, 6, 3, SYMBOL::PLAYER);
+	test_add_elem(node, 5, 3, SYMBOL::OPPONENT);
+	
+	return node;
+
+}
+
+
+
+void test_node_ptr() {
+
+	IO io;
+	
+	Node* node = new Node;
+	node->config_[0] = 'X';
+	node = new Node(node);
+	node->config_[1] = 'O';
+	node = new Node(node);
+	node->config_[2] = 'X';
+	node = new Node(node);
+	node->config_[3] = 'O';
+	node = new Node(node);
+	node->config_[4] = 'X';
+	node = new Node(node);
+	node->config_[5] = 'O';
+	node = new Node(node);
+	node->config_[6] = 'X';
+	node = new Node(node);
+	node->config_[7] = 'O';
+	node = new Node(node);
+	node->config_[8] = 'X';
+	node = new Node(node);
+	node->config_[9] = 'O';
+
+	while (node != nullptr) {
+		io.print_node(node);
+		node = node->parent_;
+	}
+
+}
+
+
+
+void test_revise_strategy() {
+
+
+	Game game;
+	IO io;
+
+
+	Node* node = test_node_01();
+	node->config_[4] = SYMBOL::PLAYER;
+	io.print_node(node);
+	std::cout << game.calculate_config_score(node, SYMBOL::PLAYER) << std::endl;
+	std::cout << game.calculate_config_score(node, SYMBOL::OPPONENT) << std::endl;
+	game.revise_strategy(node);
+	bool strategy = game.get_offensive_strategy();
+	if (strategy)
+		std::cout << "offensive strategy" << "\n" << std::endl;
+	else
+		std::cout << "not offensive strategy" << "\n" << std::endl;
+
+
+	node->config_[12] = SYMBOL::OPPONENT;
+	io.print_node(node);
+	std::cout << game.calculate_config_score(node, SYMBOL::PLAYER) << std::endl;
+	std::cout << game.calculate_config_score(node, SYMBOL::OPPONENT) << std::endl;
+	game.revise_strategy(node);
+	strategy = game.get_offensive_strategy();
+	if (strategy)
+		std::cout << "offensive strategy" << "\n" << std::endl;
+	else
+		std::cout << "not offensive strategy" << "\n" << std::endl;
+
+
+}
 
 
 
@@ -65,8 +170,13 @@ void test_heuristic_diff() {
 }
 
 
+int test_add_elem(Node* node, int row, int col, char symbol) {
+	node->config_[row*dim::SPAN + col] = symbol;
+	return row*dim::SPAN + col;
+}
 
 
+#endif
 
 /*
 
@@ -572,6 +682,18 @@ long long time_span_nanoseconds(long long init) {
 long long time_span_milliseconds(long long init) {
 	return time_span_nanoseconds(init) / 1000000;
 }
+
+
+//void test_junk() {
+//Node* node = test_node_04();
+//int score = game.calculate_config_score(node, SYMBOL::PLAYER);
+//io.print_node(node);
+//std::cout << "score " << score << "\n\n" << std::endl;
+//game.next_move(node,50);
+//score = game.calculate_config_score(node, SYMBOL::PLAYER);
+//io.print_node(node);
+//std::cout << "score " << score << "\n\n" << std::endl;
+//}
 
 
 

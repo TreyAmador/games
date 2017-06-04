@@ -1,5 +1,6 @@
 #ifndef CORE_H_
 #define CORE_H_
+#include <vector>
 struct Node;
 class Game;
 class IO;
@@ -17,11 +18,18 @@ public:
 
 private:
 	//void set_board_between_turn(Node* node);
-	void determine_move_order(Game& game, IO& io, Node* node);
+	void determine_move_order(Game& game, Node*& node, IO& io);
+	void set_time_allowed(Game& game, IO& io);
+	void opponent_turn(Node*& node, IO& io);
+	void computer_turn(Game& game, Node*& node, IO& io);
+	bool has_won(Game& game, Node* node, char symbol);
+	int complete(Node*& node, char symbol, IO& io);
 
+	void clear_nodes(std::vector<Node*>& nodes);
 
-	//bool has_won(Node* node, char player);
-	//bool has_tied(Node* node, char player);
+	void print_nodes(Node* node, IO& io);
+
+	void determine_moves(std::vector<Node*>& nodes, IO& io);
 
 
 };
