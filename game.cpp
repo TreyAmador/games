@@ -94,11 +94,16 @@ int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 	int score;
 
 	if (this->won_game(node, SYMBOL::PLAYER))
-		return this->calculate_config_score(node, SYMBOL::PLAYER);
+		return COMPUTER_WIN;
+		//return 
+		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
+		//	this->calculate_config_score(node, SYMBOL::OPPONENT);
 	if (this->won_game(node, SYMBOL::OPPONENT))
-		return -this->calculate_config_score(node, SYMBOL::OPPONENT);
+		return PLAYER_WIN;
+		//return 
+		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
+		//	this->calculate_config_score(node, SYMBOL::OPPONENT);
 	if (depth == 0)
-		//return this->calculate_config_score(node, SYMBOL::PLAYER);
 		return 
 			this->calculate_config_score(node, SYMBOL::PLAYER) - 
 			this->calculate_config_score(node,SYMBOL::OPPONENT);
@@ -116,6 +121,7 @@ int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 		alpha = alpha > score ? alpha : score;
 		if (alpha > beta)
 			unpruned = false;
+
 	}
 	return best;
 }
@@ -127,11 +133,16 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 	int score;
 
 	if (this->won_game(node, SYMBOL::PLAYER))
-		return this->calculate_config_score(node, SYMBOL::PLAYER);
+		return COMPUTER_WIN;
+		//return
+		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
+		//	this->calculate_config_score(node, SYMBOL::OPPONENT);
 	if (this->won_game(node, SYMBOL::OPPONENT))
-		return -this->calculate_config_score(node, SYMBOL::OPPONENT);
+		return PLAYER_WIN;
+		//return
+		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
+		//	this->calculate_config_score(node, SYMBOL::OPPONENT);
 	if (depth == 0)
-		//return this->calculate_config_score(node, SYMBOL::PLAYER);
 		return
 			this->calculate_config_score(node, SYMBOL::PLAYER) -
 			this->calculate_config_score(node, SYMBOL::OPPONENT);
@@ -139,7 +150,7 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 	bool unpruned = true;
 	std::vector<int> moves = this->query_possible_moves(node);
 	for (size_t i = 0; i < moves.size() && unpruned; ++i) {
-		
+
 		node->config_[moves[i]] = SYMBOL::PLAYER;
 		score = this->minimize(node, alpha, beta, depth - 1);
 		if (score > best)
@@ -149,6 +160,7 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 		beta = beta < score ? beta : score;
 		if (alpha > beta)
 			unpruned = false;
+
 	}
 	return best;
 }
@@ -178,22 +190,22 @@ int Game::calculate_config_score(Node* node, char player) {
 
 				for (int i = 1; i < dim::MAX_ADJ; ++i) {
 					if (c - i >= 0) {
-						char left_sym = node->config_[index - i];
+						char left_sym = node->config_[index-i];
 						left_symbols[i-1] = left_sym;
 					}
 					if (c + i < dim::SPAN) {
-						char right_sym = node->config_[index + i];
+						char right_sym = node->config_[index+i];
 						right_symbols[i-1] = right_sym;
 					}
 				}
 
 				for (int i = 1; i < dim::MAX_ADJ; ++i) {
 					if (r - i >= 0) {
-						char up_sym = node->config_[index - i*dim::SPAN];
+						char up_sym = node->config_[index-i*dim::SPAN];
 						up_symbols[i-1] = up_sym;
 					}
 					if (r + i < dim::SPAN) {
-						char down_sym = node->config_[index + i*dim::SPAN];
+						char down_sym = node->config_[index+i*dim::SPAN];
 						down_symbols[i-1] = down_sym;
 					}
 				}
@@ -216,88 +228,117 @@ int Game::utility_stream(char player,
 	char up[], char down[])
 {
 	int utility = 0;
-	utility += this->utility_axis(player,left,right);
-	utility += this->utility_axis(player,up,down);
+
+	utility += this->utility_player_axis(player,left,right);
+	utility += this->utility_player_axis(player,up,down);
+
+	utility += this->utility_opponent_axis(player,left);
+	utility += this->utility_opponent_axis(player,right);
+
+	utility += this->utility_opponent_axis(player,up);
+	utility += this->utility_opponent_axis(player,down);
+
+	utility += this->specific_utility(player, left);
+	utility += this->specific_utility(player, right);
+	utility += this->specific_utility(player, up);
+	utility += this->specific_utility(player, down);
+
+
 	return utility;
 }
 
 
-int Game::utility_array(char player, char arr[]) {
+int Game::utility_player_axis(char player, char dir_a[], char dir_b[]) {
+
 	int utility = 0;
 
-	char opponent = (player == SYMBOL::PLAYER ? SYMBOL::OPPONENT : SYMBOL::PLAYER);
+	int consec_plyr_a = 0, consec_plyr_b = 0;
+	bool unint_plyr_a = true, unint_plyr_b = true;
+	int oppn_a = 0, oppn_b = 0;
+	int empty_spaces = 0;
 
-	if (arr[0] == player) {
-		utility += 5;
-	}
-	//if (arr[1] == player) {
-	//	utility += 3;
-	//}
+	int close_a = this->utility_array_player(player, dir_a, 
+		consec_plyr_a,oppn_a,empty_spaces);
+	int close_b = this->utility_array_player(player, dir_b, 
+		consec_plyr_b, oppn_b,empty_spaces);
 
-	if (arr[0] == player && arr[1] == SYMBOL::EMPTY) {
-		utility += 4;
-	}
-
-
-
-	if (arr[0] == player && arr[1] == SYMBOL::EMPTY && arr[2] == SYMBOL::EMPTY) {
-		utility += 12;
+	int potential = consec_plyr_a + consec_plyr_b + empty_spaces;
+	if (potential >= dim::MAX_ADJ) {
+		utility += ((consec_plyr_a + consec_plyr_b) * close_a);
+		utility += ((consec_plyr_a + consec_plyr_b) * close_b);
 	}
 
-	if (arr[0] == player && arr[1] == player) {
+	return utility;
+
+}
+
+
+int Game::utility_opponent_axis(char player, char dir[]) {
+
+	int oppn_count = 0;
+	int closeness = 0;
+	bool uninterrupted = true;
+	int utility = 0;
+
+	for (int i = 0; i < dim::MAX_ADJ-1 && uninterrupted; ++i) {
+		char symbol = dir[i];
+		if (symbol != player && symbol != SYMBOL::EMPTY && symbol != '\0') {
+			++oppn_count;
+			closeness += (dim::MAX_ADJ) - i;
+		}
+	}
+
+	utility += (closeness*oppn_count);
+	
+	return utility;
+
+}
+
+
+int Game::utility_array_player(char player, char dir[],
+	int& plyr, int& oppn, int& empty)
+{
+	int closeness = 0;
+	bool unint_plyr = true;
+
+	for (int i = 0; i < dim::MAX_ADJ-1; ++i) {
+
+		char symbol = dir[i];
+
+		if (symbol == player) {
+			if (unint_plyr) {
+				closeness += (dim::MAX_ADJ-i);
+				++plyr;
+			}
+		}
+		else if (symbol == SYMBOL::EMPTY) {
+			if (unint_plyr) {
+				++empty;
+			}
+		}
+		else if (symbol != '\0') {
+			++oppn;
+			unint_plyr = false;
+		}
+	}
+
+	return closeness;
+}
+
+
+int Game::specific_utility(char player, char dir[]) {
+
+	int utility = 0;
+	char opponent = player == SYMBOL::PLAYER ? 
+		SYMBOL::OPPONENT : SYMBOL::PLAYER;
+
+	if (dir[0] == player && dir[1] == player) {
 		utility += 10;
 	}
 
-	if (arr[0] == player && arr[1] == player && arr[2] == SYMBOL::EMPTY) {
-		utility += 15;
+	if (dir[0] == opponent && dir[1] == opponent) {
+		utility += 10;
 	}
-
-
-	if (arr[0] == player && arr[1] == player && arr[2] == player) {
-		utility += 25;
-	}
-	
-	if (arr[0] == opponent && arr[1] == opponent && arr[2] == SYMBOL::EMPTY) {
-		utility += 15;
-	}
-
-	if (arr[0] == opponent && arr[1] == opponent && arr[2] == opponent) {
-		utility += 20;
-	}
-
-
-	return utility;
-}
-
-
-int Game::utility_axis(char player, char a[], char b[]) {
-
-	int utility = 0;
-
-	char opponent = (player == SYMBOL::PLAYER ? SYMBOL::EMPTY : SYMBOL::PLAYER);
-
-	utility += this->utility_array(player, a);
-	utility += this->utility_array(player, b);
-
-	if (a[0] == player && a[1] == SYMBOL::EMPTY && b[0] == player && b[1] == SYMBOL::EMPTY) {
-		utility += 25;
-	}
-
-	
-
-	if (a[0] == player && a[1] == player && b[0] == SYMBOL::EMPTY && b[1] == SYMBOL::EMPTY) {
-		utility += 20;
-	}
-
-	if (b[0] == player && b[1] == player && a[0] == SYMBOL::EMPTY && a[1] == SYMBOL::EMPTY) {
-		utility += 20;
-	}
-
-	if (a[0] == opponent && b[0] == opponent) {
-		utility += 15;
-	}
-
-
 
 	return utility;
 
