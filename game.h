@@ -25,7 +25,7 @@ public:
 	
 	std::vector<int> query_possible_moves(Node* node);
 
-	int calculate_config_score(Node* node, char player, int);
+	//int calculate_config_score(Node* node, char player, int);
 	
 	int calculate_config_score(Node* node, char player);
 	int calculate_config_rows(Node* node, char player);

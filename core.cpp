@@ -19,9 +19,9 @@ Core::~Core() {
 int Core::run() {
 
 
-
-	test_config_score_if();
-	if (true) return 0;
+	//test_config_score_if();
+	//if (true)
+	//	return 0;
 
 
 

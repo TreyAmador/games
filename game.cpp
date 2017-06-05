@@ -95,7 +95,10 @@ int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 	if (this->won_game(node, SYMBOL::OPPONENT))
 		return -this->calculate_config_score(node, SYMBOL::OPPONENT);
 	if (depth == 0)
-		return this->utility_offensive(node);
+		//return this->calculate_config_score(node, SYMBOL::PLAYER);
+		return 
+			this->calculate_config_score(node, SYMBOL::PLAYER) - 
+			this->calculate_config_score(node,SYMBOL::OPPONENT);
 
 	bool unpruned = true;
 	std::vector<int> moves = this->query_possible_moves(node);
@@ -125,7 +128,10 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 	if (this->won_game(node, SYMBOL::OPPONENT))
 		return -this->calculate_config_score(node, SYMBOL::OPPONENT);
 	if (depth == 0)
-		return this->utility_offensive(node);
+		//return this->calculate_config_score(node, SYMBOL::PLAYER);
+		return
+			this->calculate_config_score(node, SYMBOL::PLAYER) -
+			this->calculate_config_score(node, SYMBOL::OPPONENT);
 
 	bool unpruned = true;
 	std::vector<int> moves = this->query_possible_moves(node);
@@ -146,7 +152,11 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 
 
 
-int Game::calculate_config_score(Node* node, char player, int) {
+int Game::calculate_config_score(Node* node, char player) {
+
+
+	int heuristic = 0;
+
 
 	for (int r = 0; r < dim::SPAN; ++r) {
 		for (int c = 0; c < dim::SPAN; ++c) {
@@ -154,10 +164,19 @@ int Game::calculate_config_score(Node* node, char player, int) {
 			int index = r*dim::SPAN+c;
 			char symbol = node->config_[index];
 
-			if (node->config_[index] != SYMBOL::EMPTY) {
+			if (node->config_[index] == player) {
+
+
+
+				//std::cout << "row x col " << 
+				//	index / dim::SPAN << " " << 
+				//	index%dim::SPAN << std::endl;
+
+
 
 				int plyr_l = 0, plyr_r = 0, plyr_u = 0, plyr_d = 0;
 				int oppn_l = 0, oppn_r = 0, oppn_u = 0, oppn_d = 0;
+				int free_l = 2, free_r = 2, free_u = 2, free_d = 2;
 				
 				if (c > 0 && node->config_[index-1] != SYMBOL::EMPTY) {
 					if (node->config_[index-1] == player) {
@@ -175,7 +194,9 @@ int Game::calculate_config_score(Node* node, char player, int) {
 						++oppn_l;
 					}
 				}
-				
+				//std::cout << "left  " << plyr_l << " " << oppn_l << std::endl;
+
+
 
 				if (c < dim::SPAN-1 && node->config_[index+1] != SYMBOL::EMPTY) {
 					if (node->config_[index+1] == player) {
@@ -193,7 +214,9 @@ int Game::calculate_config_score(Node* node, char player, int) {
 						++oppn_r;
 					}
 				}
-				
+				//std::cout << "right " << plyr_r << " " << oppn_r << std::endl;
+
+
 
 				if (r > 0 && node->config_[index-dim::SPAN] != SYMBOL::EMPTY) {
 					if (node->config_[index-dim::SPAN] == player) {
@@ -211,7 +234,9 @@ int Game::calculate_config_score(Node* node, char player, int) {
 						++oppn_u;
 					}
 				}
-				
+				//std::cout << "up    " << plyr_u << " " << oppn_u << std::endl;
+
+
 
 				if (r < dim::SPAN-1 && node->config_[index+dim::SPAN] != SYMBOL::EMPTY) {
 					if (node->config_[index + dim::SPAN] == player) {
@@ -229,7 +254,101 @@ int Game::calculate_config_score(Node* node, char player, int) {
 						++oppn_d;
 					}
 				}
-				
+				//std::cout << "down  " << plyr_d << " " << oppn_d << std::endl;
+				//std::cout << "\n" << std::endl;
+
+
+
+				if (plyr_l == 2) {
+					heuristic += 8;
+				}
+				else if (plyr_l == 1) {
+					heuristic += 4;
+				}
+				else {
+					heuristic += 2;
+				}
+
+
+				if (plyr_r == 2) {
+					heuristic += 8;
+				}
+				else if (plyr_r == 1) {
+					heuristic += 4;
+				}
+				else {
+					heuristic += 2;
+				}
+
+
+				if (plyr_u == 2) {
+					heuristic += 8;
+				}
+				else if (plyr_u == 1) {
+					heuristic += 4;
+				}
+				else {
+					heuristic += 2;
+				}
+
+
+				if (plyr_d == 2) {
+					heuristic += 8;
+				}
+				else if (plyr_d == 1) {
+					heuristic += 4;
+				}
+				else {
+					heuristic += 2;
+				}
+
+
+
+
+				if (oppn_l == 2) {
+					heuristic += 4;
+				}
+				else if (oppn_l == 1) {
+					heuristic += 2;
+				}
+				else {
+					heuristic += 1;
+				}
+
+
+				if (oppn_r == 2) {
+					heuristic += 4;
+				}
+				else if (oppn_r == 1) {
+					heuristic += 2;
+				}
+				else {
+					heuristic += 1;
+				}
+
+
+				if (oppn_u == 2) {
+					heuristic += 4;
+				}
+				else if (oppn_u == 1) {
+					heuristic += 2;
+				}
+				else {
+					heuristic += 1;
+				}
+
+
+				if (oppn_d == 2) {
+					heuristic += 4;
+				}
+				else if (oppn_d == 1) {
+					heuristic += 2;
+				}
+				else {
+					heuristic += 1;
+				}
+
+
 
 
 			}
@@ -239,11 +358,11 @@ int Game::calculate_config_score(Node* node, char player, int) {
 
 	}
 
-	return 0;
+	return heuristic;
 
 }
 
-
+/*
 
 int Game::calculate_config_score(Node* node, char player) {
 	return 
@@ -251,6 +370,7 @@ int Game::calculate_config_score(Node* node, char player) {
 		this->calcualte_config_cols(node, player);
 }
 
+*/
 
 int Game::calculate_config_rows(Node* node, char player) {
 	int row_score = 0;

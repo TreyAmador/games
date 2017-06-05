@@ -88,14 +88,23 @@ void test_config_score_if() {
 	Game game;
 
 	Node* node = new Node;
-	node->config_[dim::SPAN * 3 + 3] = SYMBOL::PLAYER;
-	node->config_[dim::SPAN * 3 + 4] = SYMBOL::PLAYER;
-	node->config_[dim::SPAN * 3 + 5] = SYMBOL::PLAYER;
-	//node->config_[dim::SPAN * 3 + 4] = SYMBOL::OPPONENT;
+
+	node->config_[dim::SPAN*3+3] = SYMBOL::PLAYER;
+	node->config_[dim::SPAN * 3 + 4] = SYMBOL::OPPONENT;
+	node->config_[dim::SPAN * 4 + 4] = SYMBOL::PLAYER;
+
+	//node->config_[dim::SPAN * 3 + 3] = SYMBOL::PLAYER;
+	//node->config_[dim::SPAN * 4 + 3] = SYMBOL::PLAYER;
+	//node->config_[dim::SPAN * 5 + 3] = SYMBOL::PLAYER;
+	//node->config_[dim::SPAN * 4 + 2] = SYMBOL::OPPONENT;
+	//node->config_[dim::SPAN * 5 + 3] = SYMBOL::PLAYER;
+	//node->config_[dim::SPAN * 4 + 2] = SYMBOL::OPPONENT;
 
 
 	io.print_node(node);
-	game.calculate_config_score(node, SYMBOL::PLAYER, 1);
+	
+	std::cout << "\n" << 
+		game.calculate_config_score(node, SYMBOL::PLAYER) << "\n" << std::endl;
 
 }
 
