@@ -166,68 +166,41 @@ int Game::calculate_config_score(Node* node, char player) {
 
 			if (symbol == player) {
 
-				int consec_plyr_left = 0, consec_plyr_right = 0;
-				bool free_plyr_left = true, free_plyr_right = true;
-				int consec_oppn_left = 0, consec_oppn_right = 0;
-				bool free_oppn_left = true, free_oppn_right = true;
-				int open_left = 0, open_right = 0;
-				bool left_is_open = true, right_is_open = true;
-				
+				char left_symbols[dim::MAX_ADJ];
+				char right_symbols[dim::MAX_ADJ];
+				char up_symbols[dim::MAX_ADJ];
+				char down_symbols[dim::MAX_ADJ];
+
+				for (int i = 0; i < dim::MAX_ADJ; ++i) {
+					left_symbols[i] = right_symbols[i] = 
+						up_symbols[i] = down_symbols[i] = '\0';
+				}
+
 				for (int i = 1; i < dim::MAX_ADJ; ++i) {
 					if (c - i >= 0) {
 						char left_sym = node->config_[index - i];
-						this->compare_counter(
-							left_sym, player, free_plyr_left, consec_plyr_left, 
-							left_is_open, open_left, free_oppn_left, consec_oppn_left);
+						left_symbols[i-1] = left_sym;
 					}
 					if (c + i < dim::SPAN) {
 						char right_sym = node->config_[index + i];
-						this->compare_counter(
-							right_sym, player, free_plyr_right, consec_plyr_right, 
-							right_is_open, open_right, free_oppn_right, consec_oppn_right);
+						right_symbols[i-1] = right_sym;
 					}
 				}
-
-				int consec_plyr_up = 0, consec_plyr_down = 0;
-				bool free_plyr_up = true, free_plyr_down = true;
-				int consec_oppn_up = 0, consec_oppn_down = 0;
-				bool free_oppn_up = true, free_oppn_down = true;
-				int open_up = 0, open_down = 0;
-				bool up_is_open = true, down_is_open = true;
 
 				for (int i = 1; i < dim::MAX_ADJ; ++i) {
 					if (r - i >= 0) {
 						char up_sym = node->config_[index - i*dim::SPAN];
-						this->compare_counter(
-							up_sym, player, free_plyr_up, consec_plyr_up, 
-							up_is_open, open_up, free_oppn_up, consec_oppn_up);
+						up_symbols[i-1] = up_sym;
 					}
 					if (r + i < dim::SPAN) {
 						char down_sym = node->config_[index + i*dim::SPAN];
-						this->compare_counter(
-							down_sym, player, free_plyr_down, consec_plyr_down, 
-							down_is_open, open_down, free_oppn_down, consec_oppn_down);
+						down_symbols[i-1] = down_sym;
 					}
 				}
-
-				utility += this->compass_utility(
-					consec_plyr_left, consec_oppn_left, open_left);
-				utility += this->compass_utility(
-					consec_plyr_right, consec_oppn_right, open_right);
-				utility += this->compass_utility(
-					consec_plyr_up, consec_oppn_up, open_up);
-				utility += this->compass_utility(
-					consec_plyr_down, consec_oppn_down, open_down);
-
-				utility += this->axis_utility(
-					consec_plyr_left, consec_plyr_right, 
-					consec_oppn_left, consec_oppn_right, 
-					open_left, open_right);
-				utility += this->axis_utility(
-					consec_plyr_up, consec_plyr_down, 
-					consec_oppn_up, consec_oppn_down, 
-					open_up, open_down);
-
+				
+				utility += this->utility_stream(player,
+					left_symbols, right_symbols, 
+					up_symbols, down_symbols);
 
 			}
 		}
@@ -236,6 +209,124 @@ int Game::calculate_config_score(Node* node, char player) {
 	return utility;
 
 }
+
+
+int Game::utility_stream(char player,
+	char left[], char right[],
+	char up[], char down[])
+{
+	int utility = 0;
+	utility += this->utility_axis(player,left,right);
+	utility += this->utility_axis(player,up,down);
+	return utility;
+}
+
+
+int Game::utility_array(char player, char arr[]) {
+	int utility = 0;
+
+	char opponent = (player == SYMBOL::PLAYER ? SYMBOL::OPPONENT : SYMBOL::PLAYER);
+
+	if (arr[0] == player) {
+		utility += 5;
+	}
+	//if (arr[1] == player) {
+	//	utility += 3;
+	//}
+
+	if (arr[0] == player && arr[1] == SYMBOL::EMPTY) {
+		utility += 4;
+	}
+
+
+
+	if (arr[0] == player && arr[1] == SYMBOL::EMPTY && arr[2] == SYMBOL::EMPTY) {
+		utility += 12;
+	}
+
+	if (arr[0] == player && arr[1] == player) {
+		utility += 10;
+	}
+
+	if (arr[0] == player && arr[1] == player && arr[2] == SYMBOL::EMPTY) {
+		utility += 15;
+	}
+
+
+	if (arr[0] == player && arr[1] == player && arr[2] == player) {
+		utility += 25;
+	}
+	
+	if (arr[0] == opponent && arr[1] == opponent && arr[2] == SYMBOL::EMPTY) {
+		utility += 15;
+	}
+
+	if (arr[0] == opponent && arr[1] == opponent && arr[2] == opponent) {
+		utility += 20;
+	}
+
+
+	return utility;
+}
+
+
+int Game::utility_axis(char player, char a[], char b[]) {
+
+	int utility = 0;
+
+	char opponent = (player == SYMBOL::PLAYER ? SYMBOL::EMPTY : SYMBOL::PLAYER);
+
+	utility += this->utility_array(player, a);
+	utility += this->utility_array(player, b);
+
+	if (a[0] == player && a[1] == SYMBOL::EMPTY && b[0] == player && b[1] == SYMBOL::EMPTY) {
+		utility += 25;
+	}
+
+	
+
+	if (a[0] == player && a[1] == player && b[0] == SYMBOL::EMPTY && b[1] == SYMBOL::EMPTY) {
+		utility += 20;
+	}
+
+	if (b[0] == player && b[1] == player && a[0] == SYMBOL::EMPTY && a[1] == SYMBOL::EMPTY) {
+		utility += 20;
+	}
+
+	if (a[0] == opponent && b[0] == opponent) {
+		utility += 15;
+	}
+
+
+
+	return utility;
+
+}
+
+
+int Game::utility_array(char player, char symbol,
+	int& consec_player, bool& uninter_player, int& consec_oppn, 
+	int& consec_spaces, bool& uninter_spaces) 
+{
+	if (symbol == player) {
+		if (uninter_player) {
+			++consec_player;
+		}
+	}
+	else if (symbol == SYMBOL::EMPTY) {
+		if (uninter_spaces) {
+			++consec_spaces;
+		}
+	}
+	else {
+		if (symbol != '\0') {
+			++consec_oppn;
+		}
+		uninter_player = uninter_spaces = false;
+	}
+	return 0;
+}
+
 
 
 int Game::compass_utility(int plyr_count, int oppn_count, int open_spaces) {
@@ -264,86 +355,26 @@ int Game::axis_utility(
 }
 
 
+void Game::create_compass(char symbols[], int index, char curr_sym, char player_sym) {
 
-/*
-
-void Game::create_compass(Node* node, char player, int r, int c) {
-
-
-	int index = r*dim::SPAN + c;
-	char symbol = node->config_[index];
-
-	if (symbol == player) {
-
-		// look horizontally
-		int consec_plyr_left = 0, consec_plyr_right = 0;
-		bool free_plyr_left = true, free_plyr_right = true;
-		int consec_oppn_left = 0, consec_oppn_right = 0;
-		bool free_oppn_left = true, free_oppn_right = true;
-		int open_left = 0, open_right = 0;
-		bool left_is_open = true, right_is_open = true;
-
-		for (int i = 1; i < dim::MAX_ADJ; ++i) {
-			if (c - i >= 0) {
-				char left_sym = node->config_[index - i];
-				this->compare_counter(
-					left_sym, player, free_plyr_left, consec_plyr_left,
-					left_is_open, open_left, free_oppn_left, consec_oppn_left);
-			}
-			if (c + i < dim::SPAN) {
-				char right_sym = node->config_[index + i];
-				this->compare_counter(
-					right_sym, player, free_plyr_right, consec_plyr_right,
-					right_is_open, open_right, free_oppn_right, consec_oppn_right);
-			}
-		}
-
-
-		// calculate vert here
-		int consec_plyr_up = 0, consec_plyr_down = 0;
-		bool free_plyr_up = true, free_plyr_down = true;
-		int consec_oppn_up = 0, consec_oppn_down = 0;
-		bool free_oppn_up = true, free_oppn_down = true;
-		int open_up = 0, open_down = 0;
-		bool up_is_open = true, down_is_open = true;
-
-		for (int i = 1; i < dim::MAX_ADJ; ++i) {
-			if (r - i >= 0) {
-				char up_sym = node->config_[index - i*dim::SPAN];
-				this->compare_counter(
-					up_sym, player, free_plyr_up, consec_plyr_up,
-					up_is_open, open_up, free_oppn_up, consec_oppn_up);
-			}
-			if (r + i < dim::SPAN) {
-				char down_sym = node->config_[index + i*dim::SPAN];
-				this->compare_counter(
-					down_sym, player, free_plyr_down, consec_plyr_down,
-					down_is_open, open_down, free_oppn_down, consec_oppn_down);
-			}
-		}
-
-
-		std::cout << "row " << r << ", col " << c << "  U D L R" << std::endl;
-		std::cout << "Consec player " <<
-		consec_plyr_up << " " << consec_plyr_down << " " <<
-		consec_plyr_left << " " << consec_plyr_right << std::endl;
-		std::cout << "Consec oppn   " <<
-		consec_oppn_up << " " << consec_oppn_down << " " <<
-		consec_oppn_left << " " << consec_oppn_right << std::endl;
-		std::cout << "open dir      " <<
-		open_up << " " << open_down << " " <<
-		open_left << " " << open_right << "\n\n" << std::endl;
+	if (curr_sym == player_sym) {
 
 	}
-}
+	else if (curr_sym == SYMBOL::EMPTY) {
 
-*/
+	}
+	else {
+
+	}
+
+
+}
 
 
 void Game::compare_counter(
-	char curr_sym, char player_sym, 
+	char curr_sym, char player_sym,
 	bool& free_player, int& player_count,
-	bool& is_open, int& open_spaces, 
+	bool& is_open, int& open_spaces,
 	bool& free_oppn, int& oppn_count)
 {
 	if (curr_sym == player_sym) {
@@ -361,187 +392,6 @@ void Game::compare_counter(
 		free_player = is_open = false;
 	}
 }
-
-
-
-
-/*
-
-int Game::calculate_config_score(Node* node, char player) {
-
-
-	int heuristic = 0;
-
-
-	for (int r = 0; r < dim::SPAN; ++r) {
-		for (int c = 0; c < dim::SPAN; ++c) {
-
-			int index = r*dim::SPAN+c;
-			char symbol = node->config_[index];
-
-			if (node->config_[index] == player) {
-
-
-
-				std::cout << "row x col " << 
-					static_cast<char>((index/dim::SPAN)+'A') << " " << 
-					(index%dim::SPAN)+1 << std::endl;
-
-
-
-				int plyr_l = 0, plyr_r = 0, plyr_u = 0, plyr_d = 0;
-				int oppn_l = 0, oppn_r = 0, oppn_u = 0, oppn_d = 0;
-				//int free_l = 3, free_r = 3, free_u = 3, free_d = 3;
-				
-
-				if (c > 0) {
-					if (node->config_[index-1] == player) {
-						++plyr_l;
-					}
-					else if (node->config_[index - 1] != SYMBOL::EMPTY) {
-						++oppn_l;
-					}
-				}
-				
-				if (c > 1) {
-					if (node->config_[index-2] == player) {
-						++plyr_l;
-					}
-					else if (node->config_[index - 2] != SYMBOL::EMPTY) {
-						++oppn_l;
-					}
-				}
-				
-				
-				if (c > 2) {
-					if (node->config_[index - 3] == player) {
-						++plyr_l;
-					}
-					else if (node->config_[index - 3] != SYMBOL::EMPTY) {
-						++oppn_l;
-					}
-					
-				}
-				
-				
-				std::cout << "      P O "  << std::endl;
-
-				std::cout << "left  " << plyr_l << " " << oppn_l << std::endl;
-
-
-
-				if (c < dim::SPAN-1) {
-					if (node->config_[index+1] == player) {
-						++plyr_r;
-					}
-					else if (node->config_[index + 1] != SYMBOL::EMPTY) {
-						++oppn_r;
-					}
-					
-				}
-				
-				if (c < dim::SPAN-2) {
-					if (node->config_[index+2] == player) {
-						++plyr_r;
-					}
-					else if (node->config_[index + 2] != SYMBOL::EMPTY) {
-						++oppn_r;
-					}
-				}
-				
-				if (c < dim::SPAN - 3) {
-					if (node->config_[index + 3] == player) {
-						++plyr_r;
-					}
-					else if (node->config_[index + 3] != SYMBOL::EMPTY) {
-						++oppn_r;
-					}
-				}
-				
-				std::cout << "right " << plyr_r << " " << oppn_r << std::endl;
-				
-
-
-
-				if (r > 0) {
-					if (node->config_[index-dim::SPAN] == player) {
-						++plyr_u;
-					}
-					else if (node->config_[index - dim::SPAN] != SYMBOL::EMPTY) {
-						++oppn_u;
-					}
-				}
-				
-				if (r > 1) {
-					if (node->config_[index-2*dim::SPAN] == player) {
-						++plyr_u;
-					}
-					else if (node->config_[index - 2 * dim::SPAN] != SYMBOL::EMPTY) {
-						++oppn_u;
-					}
-				}
-				
-				if (r > 2) {
-					if (node->config_[index - 3 * dim::SPAN] == player) {
-						++plyr_u;
-					}
-					else if (node->config_[index - 3 * dim::SPAN] != SYMBOL::EMPTY) {
-						++oppn_u;
-					}
-				}
-				
-				std::cout << "up    " << plyr_u << " " << oppn_u << std::endl;
-
-
-
-				if (r < dim::SPAN-1) {
-					if (node->config_[index + dim::SPAN] == player) {
-						++plyr_d;
-					}
-					else if (node->config_[index + dim::SPAN] != SYMBOL::EMPTY) {
-						++oppn_d;
-					}
-				}
-				
-				if (r < dim::SPAN-2) {
-					if (node->config_[index+2*dim::SPAN] == player) {
-						++plyr_d;
-					}
-					else if (node->config_[index + 2 * dim::SPAN] != SYMBOL::EMPTY) {
-						++oppn_d;
-					}
-				}
-				
-				if (r < dim::SPAN - 3) {
-					if (node->config_[index + 3 * dim::SPAN] == player) {
-						++plyr_d;
-					}
-					else if (node->config_[index + 3 * dim::SPAN] != SYMBOL::EMPTY) {
-						++oppn_d;
-					}
-				}
-				
-				std::cout << "down  " << plyr_d << " " << oppn_d << std::endl;
-				std::cout << "\n" << std::endl;
-
-			}
-
-			
-		}
-
-	}
-
-	return heuristic;
-
-}
-
-*/
-
-
-
-
-
-
 
 
 
@@ -566,16 +416,6 @@ char* Game::survey_direction(Node* node, int span, int iter, int offset) {
 	return symbols;
 }
 
-
-/*
-
-int Game::calculate_config_score(Node* node, char player) {
-	return 
-		this->calculate_config_rows(node, player) + 
-		this->calcualte_config_cols(node, player);
-}
-
-*/
 
 
 int Game::calculate_config_rows(Node* node, char player) {

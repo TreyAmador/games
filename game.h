@@ -49,12 +49,25 @@ public:
 		bool& is_open, int& open_spaces, 
 		bool& free_oppn, int& oppn_count);
 
+	void create_compass(char symbols[], int index, char curr_sym, char player_sym);
+
 	
 	int compass_utility(int plyr_count, int oppn_count, int open_spaces);
 	int axis_utility(
 		int plyr_left, int plyr_right,
 		int oppn_left, int oppn_right,
 		int spaces_left, int spaces_right);
+
+	int utility_stream(char player,
+		char left[], char right[], 
+		char up[], char down[]);
+
+	int utility_axis(char player, char dir_a[], char dir_b[]);
+	int utility_array(char player, char arr[]);
+
+	int utility_array(char player, char symbol, 
+		int& consec_player, bool& uninter_player, int& consec_oppn, 
+		int& consec_spaces, bool& uninter_spaces);
 
 
 	void set_time_allowed(int time_allowed);
