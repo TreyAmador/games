@@ -65,7 +65,8 @@ public:
 	int utility_player_axis(char player, char dir_a[], char dir_b[]);
 	int utility_array_player(char player, char dir[], 
 		int& plyr, int& oppn, int& empty);
-	int utility_opponent_axis(char player, char dir[]);
+
+	int utility_opponent_axis(char player, char dir[], int& oppn);
 	int specific_utility(char player, char dir[]);
 
 	int utility_array(char player, char symbol, 
