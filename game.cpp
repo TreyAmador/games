@@ -10,7 +10,7 @@ namespace {
 	const int PLAYER_WIN = -5000;
 
 	// 63 should be the theoretical upper limit ? 
-	const int MAX_DEPTH = 15;
+	const int MAX_DEPTH = 25;
 }
 
 
@@ -34,13 +34,6 @@ void Game::next_move(Node* node) {
 	int best_element = -1;
 	int depth = 1;
 
-	//this->revise_strategy(node);
-
-	std::cout << 
-		"strategy, 1 offensive, 0 defensive " << 
-		this->offensive_strategy_ << std::endl;
-
-
 	while (depth < MAX_DEPTH) {
 		int element = this->minimax(node, depth);
 		int score = this->calculate_config_score(node, SYMBOL::PLAYER);
@@ -57,15 +50,6 @@ void Game::next_move(Node* node) {
 
 
 // TODO next move tailoring
-//
-//
-//		determine if you are maximizing or minimizing player
-//			the symbol to actually use, SYMBOL or bool
-//				pass a char symbol SYMBOL::PLAYER or SYMBOL::OPPONENT
-//				to determine if you as a player are 
-//				the maximizing or minimizing player ?
-//			perhaps have different methods based on 
-//			player heuristic or opponent heuristic
 //
 //
 //		update heuristic!
@@ -107,17 +91,11 @@ int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 	int score;
 
 	if (this->won_game(node, SYMBOL::PLAYER))
-		return COMPUTER_WIN;
+		return this->calculate_config_score(node, SYMBOL::PLAYER);
 	if (this->won_game(node, SYMBOL::OPPONENT))
-		return PLAYER_WIN;
+		return -this->calculate_config_score(node, SYMBOL::OPPONENT);
 	if (depth == 0)
-		return
-			this->offensive_strategy_ ? 
-			this->utility_offensive(node) : 
-			this->utility_defensive(node);
-		//return
-		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
-		//	(this->calculate_config_score(node, SYMBOL::OPPONENT) + 1);
+		return this->utility_offensive(node);
 
 	bool unpruned = true;
 	std::vector<int> moves = this->query_possible_moves(node);
@@ -143,16 +121,11 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 	int score;
 
 	if (this->won_game(node, SYMBOL::PLAYER))
-		return COMPUTER_WIN;
+		return this->calculate_config_score(node, SYMBOL::PLAYER);
 	if (this->won_game(node, SYMBOL::OPPONENT))
-		return PLAYER_WIN;
+		return -this->calculate_config_score(node, SYMBOL::OPPONENT);
 	if (depth == 0)
-		return this->offensive_strategy_ ?
-			this->utility_offensive(node) :
-			this->utility_defensive(node);
-		//return
-		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
-		//	(this->calculate_config_score(node, SYMBOL::OPPONENT)+1);
+		return this->utility_offensive(node);
 
 	bool unpruned = true;
 	std::vector<int> moves = this->query_possible_moves(node);
@@ -172,6 +145,106 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 }
 
 
+
+int Game::calculate_config_score(Node* node, char player, int) {
+
+	for (int r = 0; r < dim::SPAN; ++r) {
+		for (int c = 0; c < dim::SPAN; ++c) {
+
+			int index = r*dim::SPAN+c;
+			char symbol = node->config_[index];
+
+			if (node->config_[index] != SYMBOL::EMPTY) {
+
+				int plyr_l = 0, plyr_r = 0, plyr_u = 0, plyr_d = 0;
+				int oppn_l = 0, oppn_r = 0, oppn_u = 0, oppn_d = 0;
+				
+				if (c > 0 && node->config_[index-1] != SYMBOL::EMPTY) {
+					if (node->config_[index-1] == player) {
+						++plyr_l;
+					}
+					else {
+						++oppn_l;
+					}
+				}
+				if (c > 1 && node->config_[index-2] != SYMBOL::EMPTY) {
+					if (node->config_[index-2] == player) {
+						++plyr_l;
+					}
+					else {
+						++oppn_l;
+					}
+				}
+				
+
+				if (c < dim::SPAN-1 && node->config_[index+1] != SYMBOL::EMPTY) {
+					if (node->config_[index+1] == player) {
+						++plyr_r;
+					}
+					else {
+						++oppn_r;
+					}
+				}
+				if (c < dim::SPAN-2 && node->config_[index+2] != SYMBOL::EMPTY) {
+					if (node->config_[index+2] == player) {
+						++plyr_r;
+					}
+					else {
+						++oppn_r;
+					}
+				}
+				
+
+				if (r > 0 && node->config_[index-dim::SPAN] != SYMBOL::EMPTY) {
+					if (node->config_[index-dim::SPAN] == player) {
+						++plyr_u;
+					}
+					else {
+						++oppn_u;
+					}
+				}
+				if (r > 1 && node->config_[index-2*dim::SPAN] != SYMBOL::EMPTY) {
+					if (node->config_[index-2*dim::SPAN] == player) {
+						++plyr_u;
+					}
+					else {
+						++oppn_u;
+					}
+				}
+				
+
+				if (r < dim::SPAN-1 && node->config_[index+dim::SPAN] != SYMBOL::EMPTY) {
+					if (node->config_[index + dim::SPAN] == player) {
+						++plyr_d;
+					}
+					else {
+						++oppn_d;
+					}
+				}
+				if (r < dim::SPAN-2 && node->config_[index+2*dim::SPAN] != SYMBOL::EMPTY) {
+					if (node->config_[index+2*dim::SPAN] == player) {
+						++plyr_d;
+					}
+					else {
+						++oppn_d;
+					}
+				}
+				
+
+
+			}
+
+			
+		}
+
+	}
+
+	return 0;
+
+}
+
+
+
 int Game::calculate_config_score(Node* node, char player) {
 	return 
 		this->calculate_config_rows(node, player) + 
@@ -184,16 +257,26 @@ int Game::calculate_config_rows(Node* node, char player) {
 	for (int row = 0; row < dim::SPAN; ++row) {
 		int r = row*dim::SPAN;
 		for (int c = 0; c <= dim::MAX_ADJ; ++c) {
-			int uninterrupted = 0;
+			int uninterrupted = 0, consec_sym = 0, consec_counter = 0;
 			for (int i = 0; i < dim::MAX_ADJ && uninterrupted != -1; ++i) {
 				char symbol = node->config_[r+c+i];
-				if (symbol == player)
+				if (symbol == player) {
 					++uninterrupted;
-				else if (symbol != SYMBOL::EMPTY)
+					++consec_sym;
+					if (consec_sym > 1)
+						++consec_counter;
+					if (uninterrupted > 2)
+						++consec_counter;
+				}
+				else if (symbol == SYMBOL::EMPTY) {
+					consec_sym = 0;
+				}
+				else {
 					uninterrupted = -1;
+				}
 			}
 			if (uninterrupted > 0)
-				row_score += this->pow(uninterrupted, uninterrupted);
+				row_score += this->pow(uninterrupted, consec_counter);
 		}
 	}
 	return row_score;
@@ -204,16 +287,26 @@ int Game::calcualte_config_cols(Node* node, char player) {
 	int column_score = 0;
 	for (int c = 0; c < dim::SPAN; ++c) {
 		for (int r = 0; r <= dim::MAX_ADJ; ++r) {
-			int uninterrupted = 0;
+			int uninterrupted = 0, consec_sym = 0, consec_counter = 0;
 			for (int i = 0; i < dim::MAX_ADJ && uninterrupted != -1; ++i) {
 				char symbol = node->config_[c+dim::SPAN*(r+i)];
-				if (symbol == player)
+				if (symbol == player) {
 					++uninterrupted;
-				else if (symbol != SYMBOL::EMPTY)
+					++consec_sym;
+					if (consec_sym > 1)
+						++consec_counter;
+					if (uninterrupted > 2)
+						++consec_counter;
+				}
+				else if (symbol == SYMBOL::EMPTY) {
+					consec_sym = 0;
+				}
+				else {
 					uninterrupted = -1;
+				}
 			}
 			if (uninterrupted > 0)
-				column_score += this->pow(uninterrupted, uninterrupted);
+				column_score += this->pow(uninterrupted, consec_counter);
 		}
 	}
 	return column_score;
@@ -233,24 +326,11 @@ int Game::utility_defensive(Node* node) {
 }
 
 
-// TODO make something smarter here!
 std::vector<int> Game::query_possible_moves(Node* node) {
 	std::vector<int> moves;
-	for (int r = 0; r < dim::SPAN; ++r) {
-		for (int c = 0; c < dim::SPAN; ++c) {
-			int index = r*dim::SPAN+c;
-			if (node->config_[index] != SYMBOL::EMPTY) {
-				if (r != 0 && node->config_[index-1] == SYMBOL::EMPTY)
-					this->insert_unique(moves, index-1);
-				if (r != dim::SPAN && node->config_[index+1] == SYMBOL::EMPTY)
-					this->insert_unique(moves, index+1);
-				if (c != 0 && node->config_[index-dim::SPAN] == SYMBOL::EMPTY)
-					this->insert_unique(moves, index-dim::SPAN);
-				if (c != dim::SPAN && node->config_[index+dim::SPAN] == SYMBOL::EMPTY)
-					this->insert_unique(moves, index+dim::SPAN);
-			}
-		}
-	}
+	for (int i = 0; i < dim::SIZE; ++i)
+		if (node->config_[i] == SYMBOL::EMPTY)
+			moves.push_back(i);
 	return moves;
 }
 
@@ -301,10 +381,6 @@ int Game::update_min_max_col(Node* node, int col, char player) {
 }
 
 
-// TODO optimize this based on what leads to victory!
-//		perhaps:
-//			row = rand() % 2 == 0 ? 3 : 4;
-//			col = rand() % 2 == 0 ? 3 : 4;
 void Game::make_first_move(Node* node) {
 	int row = 3, col = 3;
 	node->config_[row*dim::SPAN+col] = SYMBOL::PLAYER;

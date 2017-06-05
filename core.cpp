@@ -18,6 +18,15 @@ Core::~Core() {
 
 int Core::run() {
 
+
+
+	test_config_score_if();
+	if (true) return 0;
+
+
+
+
+
 	Game game;
 	IO io;
 	Node* node = new Node;
