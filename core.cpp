@@ -24,9 +24,7 @@ int Core::run() {
 	//	return 0;
 
 
-
-
-
+	
 	Game game;
 	IO io;
 	Node* node = new Node;

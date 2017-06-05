@@ -11,6 +11,7 @@ void test_revise_strategy();
 void test_node_ptr();
 void test_exponent();
 void test_calculate_config_score();
+void test_survey_direction();
 
 
 
@@ -67,11 +68,11 @@ Node* test_node_04() {
 	Node* node = new Node;
 
 	test_add_elem(node, 3, 3, SYMBOL::PLAYER);
-	test_add_elem(node, 4, 3, SYMBOL::OPPONENT);
 	test_add_elem(node, 3, 4, SYMBOL::PLAYER);
-	test_add_elem(node, 3, 5, SYMBOL::OPPONENT);
+	test_add_elem(node, 3, 5, SYMBOL::PLAYER);
+	test_add_elem(node, 3, 6, SYMBOL::PLAYER);
 	test_add_elem(node, 6, 3, SYMBOL::PLAYER);
-	test_add_elem(node, 5, 3, SYMBOL::OPPONENT);
+	test_add_elem(node, 5, 3, SYMBOL::PLAYER);
 	
 	return node;
 
@@ -89,9 +90,16 @@ void test_config_score_if() {
 
 	Node* node = new Node;
 
-	node->config_[dim::SPAN*3+3] = SYMBOL::PLAYER;
-	node->config_[dim::SPAN * 3 + 4] = SYMBOL::OPPONENT;
-	node->config_[dim::SPAN * 4 + 4] = SYMBOL::PLAYER;
+	node->config_[dim::SPAN * 3 + 2] = SYMBOL::PLAYER;
+	node->config_[dim::SPAN * 3 + 3] = SYMBOL::PLAYER;
+	node->config_[dim::SPAN * 3 + 4] = SYMBOL::PLAYER;
+	node->config_[dim::SPAN * 4 + 2] = SYMBOL::OPPONENT;
+	node->config_[dim::SPAN * 5 + 4] = SYMBOL::PLAYER;
+	node->config_[dim::SPAN * 4 + 7] = SYMBOL::OPPONENT;
+	node->config_[dim::SPAN * 5 + 2] = SYMBOL::PLAYER;
+
+
+
 
 	//node->config_[dim::SPAN * 3 + 3] = SYMBOL::PLAYER;
 	//node->config_[dim::SPAN * 4 + 3] = SYMBOL::PLAYER;
@@ -107,6 +115,26 @@ void test_config_score_if() {
 		game.calculate_config_score(node, SYMBOL::PLAYER) << "\n" << std::endl;
 
 }
+
+
+void test_survey_direction() {
+
+	IO io;
+	Game game;
+	
+	Node* node = test_node_02();
+	io.print_node(node);
+	
+
+	char* a = game.survey_direction(node, 4, 1, dim::SPAN);
+	for (int i = 0; i < dim::MAX_ADJ; ++i) {
+		std::cout << a[i] << " ";
+	}
+	std::cout << std::endl;
+
+}
+
+
 
 
 

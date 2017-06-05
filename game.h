@@ -25,8 +25,6 @@ public:
 	
 	std::vector<int> query_possible_moves(Node* node);
 
-	//int calculate_config_score(Node* node, char player, int);
-	
 	int calculate_config_score(Node* node, char player);
 	int calculate_config_rows(Node* node, char player);
 	int calcualte_config_cols(Node* node, char player);
@@ -41,6 +39,23 @@ public:
 	void insert_unique(std::vector<int>& vec, int elem);
 	
 	void place_symbol_by_indeces(Node* node, char symbol, int row, int col);
+
+
+	char* survey_direction(Node* node, int span, int iter, int offset);
+
+	void compare_counter(
+		char curr_sym, char player_sym, 
+		bool& free_player, int& player_count, 
+		bool& is_open, int& open_spaces, 
+		bool& free_oppn, int& oppn_count);
+
+	
+	int compass_utility(int plyr_count, int oppn_count, int open_spaces);
+	int axis_utility(
+		int plyr_left, int plyr_right,
+		int oppn_left, int oppn_right,
+		int spaces_left, int spaces_right);
+
 
 	void set_time_allowed(int time_allowed);
 	void set_strategy_offensive();
