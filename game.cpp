@@ -229,9 +229,15 @@ int Game::utility_player_axis(char player, char dir_a[], char dir_b[]) {
 	if (empty >= dim::MAX_ADJ) {
 		utility += (consec_plyr_a+consec_plyr_b);
 	}
+	utility += (consec_oppn_a + consec_oppn_b);
 	utility += empty;
 
-	utility += (consec_oppn_a + consec_oppn_b);
+	char sym_a = dir_a[0];
+	char sym_b = dir_b[0];
+
+	if (sym_a == sym_b && sym_a != SYMBOL::EMPTY && sym_a != '\0') {
+		utility += dim::MAX_ADJ * 2;
+	}
 
 	return utility;
 
@@ -275,12 +281,13 @@ int Game::utility_opponent_axis(char player, char dir[], int& oppn) {
 	int utility = 0;
 	bool consecutive = true;
 
-	char opponent = player == SYMBOL::PLAYER ? SYMBOL::OPPONENT : SYMBOL::PLAYER;
+	char opponent = player == SYMBOL::PLAYER ? 
+		SYMBOL::OPPONENT : SYMBOL::PLAYER;
 
 	for (int i = 0; i < dim::MAX_ADJ - 1; ++i) {
 		if (dir[i] == opponent) {
 			if (consecutive) {
-				oppn += ((i + 1)*dim::MAX_ADJ);
+				oppn += ((i + 3)*(dim::MAX_ADJ));
 			}
 		}
 		else {
@@ -292,8 +299,6 @@ int Game::utility_opponent_axis(char player, char dir[], int& oppn) {
 	return utility;
 
 }
-
-
 
 
 int Game::specific_utility(char player, char dir[]) {

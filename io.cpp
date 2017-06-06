@@ -131,7 +131,7 @@ void IO::complete(std::vector<Node*>& nodes, char symbol) {
 			}
 		}
 	}
-	std::cout << "\n" << std::endl;
+	std::cout << "for the win." << "\n" << std::endl;
 }
 
 

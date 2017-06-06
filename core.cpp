@@ -46,11 +46,11 @@ void Core::determine_move_order(Game& game, Node*& node, IO& io) {
 	if (io.computer_moves_first()) {
 		node = new Node(node);
 		game.make_first_move(node);
-		game.set_strategy_offensive();
+		//game.set_strategy_offensive();
 	}
-	else {
-		game.set_strategy_defensive();
-	}
+	//else {
+	//	game.set_strategy_defensive();
+	//}
 	io.print_node(node);
 }
 
