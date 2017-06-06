@@ -84,12 +84,18 @@ public:
 
 	int pow(int base, int exp);
 	void clear_nodes(std::vector<Node*>& nodes);
+
+	void init_clock();
+	bool time_expired();
+
 	bool won_game(Node* node, char symbol);
+	bool tied_game(Node* node);
 
 
 private:
 	int max_depth_;
 	int time_allowed_;
+	long long algorithm_time_;
 	bool offensive_strategy_;
 
 

@@ -19,6 +19,13 @@ IO::~IO() {
 }
 
 
+void IO::salutations() {
+	std::cout << "\n" <<
+		"Greetings, welcome a rather unintelligent" << 
+		" 4-in-a-line solver.  See if you can beat it!" << "\n" << std::endl;
+}
+
+
 bool IO::computer_moves_first() {
 	do {
 		std::cout << 
@@ -106,15 +113,25 @@ void IO::complete(std::vector<Node*>& nodes, char symbol) {
 
 	if (symbol == SYMBOL::PLAYER)
 		std::cout << "The computer has won." << "\n\n" << std::endl;
-	else
+	else if (symbol == SYMBOL::OPPONENT)
 		std::cout << "Congratulations, you have won." << "\n\n" << std::endl;
+	else if (symbol == SYMBOL::EMPTY)
+		std::cout << "The game is a tie." << "\n\n" << std::endl;
 
-	for (std::vector<Node*>::iterator iter = nodes.begin(); 
-		iter != nodes.end(); ++iter) 
-	{
-		this->print_node(*iter);
+	std::cout << "The winning moves: " << std::endl;
+	for (size_t n = 1; n < nodes.size(); ++n) {
+		bool incomplete = true;
+		for (int i = 0; i < dim::SIZE && incomplete; ++i) {
+			if (nodes[n - 1]->config_[i] != nodes[n]->config_[i]) {
+				std::cout << "\n" <<
+					nodes[n]->config_[i] << " at " <<
+					static_cast<char>(i/dim::SPAN + 'A') <<
+					(i%dim::SPAN) + 1 << " ";
+				incomplete = false;
+			}
+		}
 	}
-
+	std::cout << "\n" << std::endl;
 }
 
 

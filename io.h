@@ -12,6 +12,7 @@ public:
 	IO();
 	~IO();
 
+	void salutations();
 	bool computer_moves_first();
 	int time_allowed();
 	int enter_next_move(Node* node);

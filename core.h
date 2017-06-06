@@ -25,7 +25,7 @@ private:
 	void set_time_allowed(Game& game, IO& io);
 	
 	bool has_won(Game& game, Node* node, char symbol);
-	int complete(Node*& node, char symbol, IO& io);
+	int complete(Game& game, Node*& node, char symbol, IO& io);
 	void clear_nodes(std::vector<Node*>& nodes);
 
 

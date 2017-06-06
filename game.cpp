@@ -2,22 +2,18 @@
 #include "node.h"
 #include "io.h"
 #include <iostream>
+#include <chrono>
 #include <cmath>
 
 
 namespace {
+
 	const int COMPUTER_WIN = 5000;
 	const int PLAYER_WIN = -5000;
-
-	// 63 should be the theoretical upper limit ? 
 	const int MAX_DEPTH = 25;
-
-
 	const char TERMINATE = '\0';
+
 }
-
-
-typedef Node* GameBoard;
 
 
 Game::Game() {
@@ -30,12 +26,13 @@ Game::~Game() {
 }
 
 
-// TODO implement minimizing or maximizing player ability
 void Game::next_move(Node* node) {
 
 	int best_score = 0;
 	int best_element = -1;
 	int depth = 1;
+
+	this->init_clock();
 
 	while (depth < MAX_DEPTH) {
 		int element = this->minimax(node, depth);
@@ -51,15 +48,6 @@ void Game::next_move(Node* node) {
 	node->config_[best_element] = SYMBOL::PLAYER;
 }
 
-
-// TODO next move tailoring
-//
-//
-//		update heuristic!
-//			it's crap!
-//			perhaps calculate heuristic in same function searching moves
-//
-//
 
 int Game::minimax(Node* node, int depth) {
 	
@@ -84,10 +72,6 @@ int Game::minimax(Node* node, int depth) {
 }
 
 
-// NOTE it is questionable if there is some better value to return
-//		upon a victory / defeat ...  what would work best?
-//		this should be revised, a computer win was this before:
-//			return this->calculate_config_score(node, SYMBOL::PLAYER);
 int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 
 	int best = INT_MAX;
@@ -96,18 +80,10 @@ int Game::minimize(Node* node, int& alpha, int& beta, int depth) {
 	if (this->won_game(node, SYMBOL::PLAYER))
 		return
 			this->calculate_config_score(node, SYMBOL::PLAYER);
-		//return COMPUTER_WIN;
-		//return 
-		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
-		//	this->calculate_config_score(node, SYMBOL::OPPONENT);
 	if (this->won_game(node, SYMBOL::OPPONENT))
 		return
 			-this->calculate_config_score(node, SYMBOL::OPPONENT);
-		//return PLAYER_WIN;
-		//return 
-		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
-		//	this->calculate_config_score(node, SYMBOL::OPPONENT);
-	if (depth == 0)
+	if (depth == 0 || this->time_expired())
 		return 
 			this->calculate_config_score(node, SYMBOL::PLAYER) - 
 			this->calculate_config_score(node,SYMBOL::OPPONENT);
@@ -139,18 +115,10 @@ int Game::maximize(Node* node, int& alpha, int& beta, int depth) {
 	if (this->won_game(node, SYMBOL::PLAYER))
 		return
 			this->calculate_config_score(node, SYMBOL::PLAYER);
-		//return COMPUTER_WIN;
-		//return
-		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
-		//	this->calculate_config_score(node, SYMBOL::OPPONENT);
 	if (this->won_game(node, SYMBOL::OPPONENT))
 		return
 			-this->calculate_config_score(node, SYMBOL::OPPONENT);
-		//return PLAYER_WIN;
-		//return
-		//	this->calculate_config_score(node, SYMBOL::PLAYER) -
-		//	this->calculate_config_score(node, SYMBOL::OPPONENT);
-	if (depth == 0)
+	if (depth == 0 || this->time_expired())
 		return
 			this->calculate_config_score(node, SYMBOL::PLAYER) -
 			this->calculate_config_score(node, SYMBOL::OPPONENT);
@@ -240,17 +208,6 @@ int Game::utility_stream(char player,
 	utility += this->utility_player_axis(player,left,right);
 	utility += this->utility_player_axis(player,up,down);
 
-	//utility += this->utility_opponent_axis(player,left);
-	//utility += this->utility_opponent_axis(player,right);
-
-	//utility += this->utility_opponent_axis(player,up);
-	//utility += this->utility_opponent_axis(player,down);
-
-	//utility += this->specific_utility(player, left);
-	//utility += this->specific_utility(player, right);
-	//utility += this->specific_utility(player, up);
-	//utility += this->specific_utility(player, down);
-
 	return utility;
 }
 
@@ -338,95 +295,6 @@ int Game::utility_opponent_axis(char player, char dir[], int& oppn) {
 
 
 
-/*
-
-int Game::utility_player_axis(char player, char dir_a[], char dir_b[]) {
-
-	int utility = 0;
-
-	int consec_plyr_a = 0, consec_plyr_b = 0;
-	bool unint_plyr_a = true, unint_plyr_b = true;
-	int oppn_a = 0, oppn_b = 0;
-	int empty_spaces = 0;
-
-	int close_a = this->utility_array_player(player, dir_a, 
-		consec_plyr_a,oppn_a,empty_spaces);
-	int close_b = this->utility_array_player(player, dir_b, 
-		consec_plyr_b, oppn_b,empty_spaces);
-
-	int potential = consec_plyr_a + consec_plyr_b + empty_spaces;
-	if (potential >= dim::MAX_ADJ) {
-		utility += ((consec_plyr_a + consec_plyr_b) * close_a);
-		utility += ((consec_plyr_a + consec_plyr_b) * close_b);
-	}
-
-	return utility;
-
-
-}
-
-*/
-
-/*
-
-int Game::utility_opponent_axis(char player, char dir[]) {
-
-	int oppn_count = 0;
-	int closeness = 0;
-	bool uninterrupted = true;
-	int utility = 0;
-
-	for (int i = 0; i < dim::MAX_ADJ-1 && uninterrupted; ++i) {
-		char symbol = dir[i];
-		if (symbol != player && symbol != SYMBOL::EMPTY && symbol != '\0') {
-			++oppn_count;
-			closeness += (dim::MAX_ADJ) - i;
-		}
-	}
-
-	utility += (closeness*oppn_count);
-	
-	return utility;
-
-}
-
-*/
-
-
-/*
-
-int Game::utility_array_player(char player, char dir[],
-	int& plyr, int& oppn, int& empty)
-{
-	int closeness = 0;
-	bool unint_plyr = true;
-
-	for (int i = 0; i < dim::MAX_ADJ-1; ++i) {
-
-		char symbol = dir[i];
-
-		if (symbol == player) {
-			if (unint_plyr) {
-				closeness += (dim::MAX_ADJ-i);
-				++plyr;
-			}
-		}
-		else if (symbol == SYMBOL::EMPTY) {
-			if (unint_plyr) {
-				++empty;
-			}
-		}
-		else if (symbol != '\0') {
-			++oppn;
-			unint_plyr = false;
-		}
-	}
-
-	return closeness;
-}
-
-*/
-
 
 int Game::specific_utility(char player, char dir[]) {
 
@@ -437,27 +305,6 @@ int Game::specific_utility(char player, char dir[]) {
 		utility += 5;
 	}
 
-
-	/*
-	if (dir[0] == player) {
-		utility += 3;
-		if (dir[1] == player) {
-			utility += 10;
-			if (dir[2] == player) {
-				utility += 10;
-			}
-		}
-	}
-	if (dir[0] == opponent) {
-		utility += 3;
-		if (dir[1] == opponent) {
-			utility += 15;
-			if (dir[2] == opponent) {
-				utility += 15;
-			}
-		}
-	}
-	*/
 
 	return utility;
 
@@ -731,7 +578,7 @@ void Game::set_max_depth(int depth) {
 
 
 void Game::set_time_allowed(int time_allowed) {
-	this->time_allowed_ = time_allowed;
+	this->time_allowed_ = time_allowed*1000000000;
 }
 
 
@@ -751,6 +598,20 @@ void Game::revise_strategy(Node* node) {
 	int opponent_score = this->calculate_config_score(node, SYMBOL::OPPONENT);
 	this->offensive_strategy_ = player_score >= opponent_score;
 
+}
+
+
+void Game::init_clock() {
+	algorithm_time_ = 
+		std::chrono::high_resolution_clock::now().time_since_epoch().count();
+}
+
+
+bool Game::time_expired() {
+	long long range = 
+		std::chrono::high_resolution_clock::now().time_since_epoch().count() - 
+		algorithm_time_;
+	return range >= this->time_allowed_;
 }
 
 
@@ -798,6 +659,16 @@ bool Game::won_game(Node* node, char symbol) {
 	}
 
 	return false;
+}
+
+
+bool Game::tied_game(Node* node) {
+	for (int i = 0; i < dim::SIZE; ++i) {
+		if (node->config_[i] == SYMBOL::EMPTY) {
+			return false;
+		}
+	}
+	return true;
 }
 
 

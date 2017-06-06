@@ -2,7 +2,6 @@
 #include "core.h"
 #include "node.h"
 #include "game.h"
-#include "test.h"
 #include "io.h"
 
 
@@ -18,40 +17,23 @@ Core::~Core() {
 
 int Core::run() {
 
-
-	//test_config_score_if();
-	//if (true)
-	//	return 0;
-
-
-	
 	Game game;
 	IO io;
 	Node* node = new Node;
 
-	// re-comment this in
+	io.salutations();
 	this->set_time_allowed(game, io);
 	this->determine_move_order(game, node, io);
 
-	//node = new Node(node);
-	//node->config_[3 * dim::SPAN + 3] = SYMBOL::PLAYER;
-
-	
 	while (true) {
 
-		// automated
-		// uncommend below to run for real
 		this->opponent_turn(node,io);
-
-		// uncomment this to run crappy test
-		//this->opponent_turn_test(node, io);
-
 		if (this->has_won(game, node, SYMBOL::OPPONENT))
-			return this->complete(node, SYMBOL::OPPONENT, io);
+			return this->complete(game, node, SYMBOL::OPPONENT, io);
 
 		this->computer_turn(game, node, io);
 		if (this->has_won(game, node, SYMBOL::PLAYER))
-			return this->complete(node, SYMBOL::PLAYER, io);
+			return this->complete(game, node, SYMBOL::PLAYER, io);
 
 	}
 
@@ -94,29 +76,36 @@ void Core::opponent_turn(Node*& node, IO& io) {
 
 
 bool Core::has_won(Game& game, Node* node, char symbol) {
-	return game.won_game(node, symbol);
+	return game.won_game(node, symbol) || game.tied_game(node);
 }
 
 
-// TODO implement to print nodes and find moves taken
-int Core::complete(Node*& node, char symbol, IO& io) {
+int Core::complete(Game& game, Node*& node, char symbol, IO& io) {
+	
+	Node* out = node;
 	std::vector<Node*> nodes;
 	while (node != nullptr) {
 		nodes.insert(nodes.begin(), node);
 		node = node->parent_;
 	}
-	io.complete(nodes,symbol);
+
+	if (game.won_game(out, SYMBOL::PLAYER)) {
+		io.complete(nodes, SYMBOL::PLAYER);
+	}
+	else if (game.won_game(out, SYMBOL::OPPONENT)) {
+		io.complete(nodes, SYMBOL::OPPONENT);
+	}
+	else if (game.tied_game(out)) {
+		io.complete(nodes, SYMBOL::EMPTY);
+	}
+	game.clear_nodes(nodes);
+
 	return 0;
 }
 
 
 void Core::retroactive_moves(std::vector<Node*>& nodes, IO& io) {
-	std::vector<int> moves;
-	for (size_t i = 0; i < nodes.size()-1; ++i) {
 
-
-
-	}
 
 }
 
